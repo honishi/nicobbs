@@ -1,0 +1,8 @@
+venv
+*.pyc
+nicobbs.config*
+!nicobbs.config.sample
+twitter.config*
+!twitter.config.sample
+
+log/*.log

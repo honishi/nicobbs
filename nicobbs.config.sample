@@ -1,0 +1,10 @@
+[nicobbs]
+# dry run, true/false
+dry_run = false
+# account
+mail = user@example.com
+password = password
+# mongo
+database_name = dbname
+# target, comma-separated
+target_communities = co12345

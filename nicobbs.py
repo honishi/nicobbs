@@ -1,0 +1,253 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# use nicobbs
+# db.response.ensureIndex({"communityId":1, "number":1})
+
+import urllib2, cookielib, re, time, ConfigParser
+from bs4 import BeautifulSoup
+import pymongo
+import os
+
+# from os import path
+import logging
+import logging.config
+
+import twitter
+
+# urls
+LOGIN_URL = 'https://secure.nicovideo.jp/secure/login'
+COMMUNITY_BBS_URL = 'http://com.nicovideo.jp/bbs/'
+RESPONSE_URL = 'http://dic.nicovideo.jp/b/c/'
+# VIDEO_ID_REGEXP = 'http://www.nicovideo.jp/watch/(.+)'
+DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
+RESID_REGEXP = 'ID: (.+)'
+
+# const, directory
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+LOGCONF_PATH = ROOT_DIR + '/log.conf'
+NICOBBS_CONFIG = ROOT_DIR + '/' + 'nicobbs.config'
+
+# const, crawl
+CRAWL_INTERVAL = (1*60)
+RETRY_INTERVAL = 10
+TWEET_INTERVAL = 5
+
+class NicoBBS(object):
+# life cycle
+    def __init__(self):
+        # logging
+        logging.config.fileConfig(LOGCONF_PATH)
+        self.logger = logging.getLogger("root")
+        # config
+        self.dry_run, self.mail, self.password, self.database_name, self.target_communities = self.get_config()
+        # instance var
+        self.community_id = self.target_communities[0]
+        # mongo
+        self.conn = pymongo.Connection() 
+        self.db = self.conn[self.database_name]
+        # twitter
+        self.twitter = twitter.twitter()
+
+    def __del__(self):
+        # mongo
+        self.conn.disconnect()
+
+# utility
+    def get_config(self):
+        config = ConfigParser.ConfigParser()
+        config.read(NICOBBS_CONFIG)
+        if config.get("nicobbs", "dry_run").lower() == "true":
+            dry_run = True
+        else:
+            dry_run = False
+        mail = config.get("nicobbs", "mail")
+        password = config.get("nicobbs", "password")
+        database_name = config.get("nicobbs", "database_name")
+        try:
+            target_communities = config.get("nicobbs", "target_communities").split(',')
+        except ConfigParser.NoOptionError, unused_error:
+            target_communities = None
+
+        self.logger.debug("dry_run: %s mail: %s password: *** database_name: %s target_communities: %s"
+            % (dry_run, mail, database_name, target_communities))
+
+        return dry_run, mail, password, database_name, target_communities
+
+# nico nico
+    def create_opener(self):
+        # cookie
+        cookiejar = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
+        self.logger.debug("finished setting up cookie library.")
+
+        # login
+        opener.open(LOGIN_URL, "mail=%s&password=%s" % (self.mail, self.password))
+        self.logger.debug("finished login.")
+
+        return opener
+
+    def get_bbs_internal_url(self, opener, community_id):
+        # get bbs 
+        url = COMMUNITY_BBS_URL + community_id
+        # self.logger.debug(url)
+        reader = opener.open(url)
+        rawhtml = reader.read()
+        self.logger.debug("finished to get raw bbs.")
+
+        # print rawhtml
+        # use regular expression, instead of beautifulsoup. because of html change.
+        # soup = BeautifulSoup(rawhtml)
+        # internal_url = soup.findAll("iframe")[0]['src']
+        se = re.search('<iframe src="(.+?)"', rawhtml)
+        internal_url = se.group(1)
+
+        self.logger.debug("bbs internal url: " + internal_url)
+
+        return internal_url
+
+    def get_responses(self, opener, url, community_id):
+        # get bbs 
+        # self.logger.debug(url)
+        reader = opener.open(url)
+        rawhtml = reader.read()
+        self.logger.debug("finished to get raw responses.")
+
+        # print rawhtml
+        # os.sys.exit()
+
+        soup = BeautifulSoup(rawhtml)
+        resheads = soup.findAll("dt", {"class": "reshead"})
+        resbodies = soup.findAll("dd", {"class": "resbody"})
+        responses = []
+        index = 0
+        for reshead in resheads:
+            # extract
+            number = reshead.find("a", {"class": "resnumhead"})["name"]
+            name = reshead.find("span", {"class": "name"}).text.strip()
+            # use "search", instead of "mathch"
+            # http://www.python.jp/doc/2.6/library/re.html#vs
+            date = "n/a"
+            se = re.search(DATE_REGEXP, reshead.text.strip())
+            if se: date = se.group(1)
+            hash_id = re.search(RESID_REGEXP, reshead.text.strip()).group(1)
+            body = "".join([unicode(x) for x in resbodies[index]]).strip()
+            body = self.sanitize_message(body)
+            # self.logger.debug(u"[%s] [%s] [%s] [\n%s\n]".encode('utf_8') % (number, name, date, body))
+            index += 1
+
+            # append
+            response = {
+                "communityId": community_id,
+                "number": number,
+                "name": name,
+                "date": date,
+                "hash": hash_id,
+                "body": body
+            }
+            responses.append(response)
+
+        return responses
+
+# utility
+    def sanitize_message(self, message):
+        message = re.sub("<br/>", "\n", message)
+        message = re.sub("<.*?>", "", message)
+        message = re.sub("&gt;", ">", message)
+        message = re.sub("&lt;", "<", message)
+
+        return message
+        
+    def adjust_message(self, message):
+        length = len(message)
+        self.logger.debug("message length: %d" % length)
+        adjusted = message
+        # if length <= 119:
+        if length <= 140:
+            self.logger.debug("no need to adjust message.")
+        else:
+            # adjusted = message[0:119-3]
+            adjusted = message[0:140-3]
+            adjusted += "..."
+        # self.logger.debug("adjusted: [%s]" % adjusted)
+
+        return adjusted
+
+# mongo
+    """
+    # community
+    def update_community(self, community):
+        self.db.community.update({"communityId": community["communityId"]}, community, True)
+        return
+
+    def community(self, communityId):
+        communities = self.db.community.find({"communityId": communityId})
+        return communities[0]
+    """
+
+    # response
+    def update_response(self, response):
+        self.db.response.update({"communityId": response["communityId"], "number": response["number"]}, response, True)
+        return
+
+    def is_registered(self, response):
+        count = self.db.response.find({"communityId": response["communityId"], "number": response["number"]}).count()
+        return True if 0 < count else False
+
+# main
+    def page_number(self, strnum):
+        intnum = int(strnum)
+        return str(intnum - ((intnum-1) % 30))
+
+    def crawl(self):
+        self.logger.debug("started crawling.")
+
+        tweet_count = 0
+        opener = self.create_opener()
+        internal_url = self.get_bbs_internal_url(opener, self.community_id)
+        responses = self.get_responses(opener, internal_url, self.community_id) 
+        self.logger.debug("scraped %s responses", len(responses))
+        for response in responses:
+            if self.is_registered(response):
+                pass
+                # self.logger.debug("registered: [%s]" % response)
+            else:
+                # self.logger.debug("un-registered: [%s]" % response)
+                if not self.dry_run:
+                    self.update_response(response)
+                # create message
+                message = "(%s)\n%s" % (response["name"], response["body"])
+                message = self.adjust_message(message)
+                num = response["number"]
+                # message += " " + RESPONSE_URL + self.community_id + "/" + self.page_number(num) + "-#" + num
+                # sleep before tweet
+                if 0 < tweet_count:
+                    self.logger.debug("will sleep %d secs before next tweet..." % TWEET_INTERVAL)
+                    time.sleep(TWEET_INTERVAL)
+                if not self.dry_run:
+                    self.twitter.update_status(message)
+                self.logger.debug("[" + message + "]")
+                tweet_count += 1
+
+        self.logger.debug("finished crawling.")
+        return
+
+    def go(self):
+        # inifinite loop
+        while True:
+            try:
+                # crawl
+                self.logger.debug("**********")
+                self.crawl()
+                # sleep
+                self.logger.debug("will sleep %d secs." % CRAWL_INTERVAL)
+                time.sleep(CRAWL_INTERVAL)
+            except Exception, error:
+                self.logger.debug(error)
+                self.logger.debug("caught error, will retry %s seconds later..." % RETRY_INTERVAL)
+                time.sleep(RETRY_INTERVAL)
+
+if __name__ == "__main__":
+    nicobbs = NicoBBS()
+    nicobbs.go()
+
