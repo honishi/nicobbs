@@ -14,15 +14,12 @@ access_secret = xxx
 [loggers]
 keys=root
 
-[formatters]
-keys=default
+[logger_root]
+level=NOTSET
+handlers=default
 
 [handlers]
 keys=default
-
-[formatter_default]
-format=[%(asctime)s] [%(levelname)s] %(message)s
-datefmt=
 
 [handler_default]
 class=StreamHandler
@@ -30,6 +27,9 @@ level=NOTSET
 formatter=default
 args=(sys.stdout,)
 
-[logger_root]
-level=NOTSET
-handlers=default
+[formatters]
+keys=default
+
+[formatter_default]
+format=[%(asctime)s] [%(levelname)s] %(message)s
+datefmt=
