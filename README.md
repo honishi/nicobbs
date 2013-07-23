@@ -1,12 +1,12 @@
 nicobbs to twitter
 =============
-![anokoku](https://dl.dropboxusercontent.com/u/444711/honishi.github.com/nicobbs/ankoku.jpeg)
+![anokoku](https://dl.dropboxusercontent.com/u/444711/image/github.com/nicobbs/ankoku.jpeg)
 
 scraping niconama bbs, and update status to twitter
 
 sample
 -------------
-![tweets](https://dl.dropboxusercontent.com/u/444711/honishi.github.com/nicobbs/tweets.png)
+![tweets](https://dl.dropboxusercontent.com/u/444711/image/github.com/nicobbs/tweets.png)
 
 requirements
 -------------
