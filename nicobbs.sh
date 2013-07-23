@@ -7,57 +7,79 @@ logfile=${basedir}/log/nicobbs.log
 kill_python="python ${program}"
 monitor_threshold=$((2*60))
 dbname=$(grep database_name ${basedir}/nicobbs.config | cut -d'=' -f2 | tr -d ' ')
+customenv=${basedir}/nicobbs.env
 
-# these settings are needed for calling ffmpeg etc from python
-export LANG=en_US.UTF-8
-# export PATH=${PATH}:/usr/local/bin
+# export LANG=en_US.UTF-8
 
 start() {
-    nohup ${program} >> ${logfile} 2>&1 &
-    RETVAL=$?
-    return $RETVAL
+  nohup ${program} >> ${logfile} 2>&1 &
+  return $?
 }
 
 stop() {
-    pkill -f "${kill_python}"
-    RETVAL=$?
-    return $RETVAL
+  pkill -f "${kill_python}"
+  return $?
 }
 
 monitor() {
-    echo $(date) monitor start
+  echo $(date) monitor start
 
-    last_modified=$(date -r ${logfile} +%s)
-    # last_modified=0
-    current=$(date +%s)
-    # echo $last_modified
-    # echo $current
+  last_modified=$(date -r ${logfile} +%s)
+  # last_modified=0
+  current=$(date +%s)
+  # echo $last_modified
+  # echo $current
 
-    if [ $((${last_modified} + ${monitor_threshold})) -lt ${current} ]
-    then
-        echo $(date) "it seems that the file ${logfile} is not updated in ${monitor_threshold} seconds, so try to restart."
-        stop
-        start
-    fi
+  if [ $((${last_modified} + ${monitor_threshold})) -lt ${current} ]
+  then
+      echo $(date) "it seems that the file ${logfile} is not updated in ${monitor_threshold} seconds, so try to restart."
+      stop
+      start
+  fi
 
-    echo $(date) monitor end
+  echo $(date) monitor end
+}
+
+oneshot() {
+  ${program}
+  return $?
 }
 
 clear() {
-    mongo << _eof_
-    use ${dbname}
-    db.response.remove()
+  mongo << _eof_
+  use ${dbname}
+  db.response.remove()
 _eof_
 }
 
 find() {
-    mongo << _eof_
-    use ${dbname}
-    db.response.find()
+  mongo << _eof_
+  use ${dbname}
+  db.response.find()
 _eof_
 }
 
+switch() {
+  if [ $# -ne 1 ]; then
+    echo "not enough arguments."
+    echo "usage: ${0} switch dev|prod"
+    return 1
+  fi
+    
+  for target in nicobbs.config
+  do
+    rm ${target}
+    ln -s ./${target}.${1} ./${target}
+  done
+  
+  return 0
+}
+
 source ${pyenv}
+
+if [ -e ${customenv} ]; then
+    source ${customenv}
+fi
 
 case "$1" in
   start)
@@ -75,16 +97,22 @@ case "$1" in
   monitor)
         monitor
         ;;
+  oneshot)
+        oneshot
+        ;;
   clear)
         clear
         ;;
   find)
         find
         ;;
+  switch)
+	shift
+	switch $*
+	;;
   *)
-        echo $"Usage: $prog {start|stop|restart|monitor|clear|find}"
+        echo $"Usage: $prog {start|stop|restart|monitor|oneshot|clear|find|switch}"
         RETVAL=2
 esac
 
 exit $RETVAL
-

@@ -1,10 +1,35 @@
 [nicobbs]
-# dry run, true/false
 dry_run = false
-# account
 mail = user@example.com
 password = password
-# mongo
 database_name = dbname
-# target, comma-separated
-target_communities = co12345
+target_community = co12345
+
+[twitter]
+consumer_key = xxx
+consumer_secret = xxx
+access_key = xxx
+access_secret = xxx
+
+[loggers]
+keys=root
+
+[formatters]
+keys=default
+
+[handlers]
+keys=default
+
+[formatter_default]
+format=[%(asctime)s] [%(levelname)s] %(message)s
+datefmt=
+
+[handler_default]
+class=StreamHandler
+level=NOTSET
+formatter=default
+args=(sys.stdout,)
+
+[logger_root]
+level=NOTSET
+handlers=default

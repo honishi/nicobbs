@@ -5,15 +5,14 @@
 # db.response.ensureIndex({"communityId":1, "number":1})
 
 import urllib2, cookielib, re, time, ConfigParser
+import os
 from bs4 import BeautifulSoup
 import pymongo
-import os
+import tweepy
 
 # from os import path
 import logging
 import logging.config
-
-import twitter
 
 # urls
 LOGIN_URL = 'https://secure.nicovideo.jp/secure/login'
@@ -37,17 +36,15 @@ class NicoBBS(object):
 # life cycle
     def __init__(self):
         # logging
-        logging.config.fileConfig(LOGCONF_PATH)
+        logging.config.fileConfig(NICOBBS_CONFIG)
         self.logger = logging.getLogger("root")
         # config
-        self.dry_run, self.mail, self.password, self.database_name, self.target_communities = self.get_config()
-        # instance var
-        self.community_id = self.target_communities[0]
+        self.dry_run, self.mail, self.password, self.database_name, self.target_community = self.get_config()
         # mongo
         self.conn = pymongo.Connection() 
         self.db = self.conn[self.database_name]
         # twitter
-        self.twitter = twitter.twitter()
+        self.twitter = self.get_twitter()
 
     def __del__(self):
         # mongo
@@ -64,15 +61,46 @@ class NicoBBS(object):
         mail = config.get("nicobbs", "mail")
         password = config.get("nicobbs", "password")
         database_name = config.get("nicobbs", "database_name")
+        target_community = config.get("nicobbs", "target_community")
+
+        self.logger.debug("dry_run: %s mail: %s password: *** database_name: %s target_community: %s"
+            % (dry_run, mail, database_name, target_community))
+
+        return dry_run, mail, password, database_name, target_community
+
+# twitter
+    def get_twitter(self):
+        config = ConfigParser.ConfigParser()
+        config.read(NICOBBS_CONFIG)
+
+        consumer_key = config.get("twitter", "consumer_key")
+        consumer_secret = config.get("twitter", "consumer_secret")
+        access_key = config.get("twitter", "access_key")
+        access_secret = config.get("twitter", "access_secret")
+
+        self.logger.debug("consumer_key: %s consumer_secret: *** access_key: %s access_secret: ***"
+                % (consumer_key, access_key))
+
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth.set_access_token(access_key, access_secret)
+
+        return tweepy.API(auth)
+
+    def update_status(self, status):
         try:
-            target_communities = config.get("nicobbs", "target_communities").split(',')
-        except ConfigParser.NoOptionError, unused_error:
-            target_communities = None
+          self.twitter.update_status(status)
+        except tweepy.error.TweepError, error:
+          print u'error in post.'
+          print error
 
-        self.logger.debug("dry_run: %s mail: %s password: *** database_name: %s target_communities: %s"
-            % (dry_run, mail, database_name, target_communities))
-
-        return dry_run, mail, password, database_name, target_communities
+    def remove_all(self):
+        for status in tweepy.Cursor(self.twitter.user_timeline).items(1000):
+            try:
+                self.twitter.destroy_status(status.id)
+            except tweepy.error.TweepError, error:
+                print u'error in post destroy'
+                print error
+            sys.stdout.flush()
 
 # nico nico
     def create_opener(self):
@@ -174,17 +202,6 @@ class NicoBBS(object):
         return adjusted
 
 # mongo
-    """
-    # community
-    def update_community(self, community):
-        self.db.community.update({"communityId": community["communityId"]}, community, True)
-        return
-
-    def community(self, communityId):
-        communities = self.db.community.find({"communityId": communityId})
-        return communities[0]
-    """
-
     # response
     def update_response(self, response):
         self.db.response.update({"communityId": response["communityId"], "number": response["number"]}, response, True)
@@ -204,8 +221,8 @@ class NicoBBS(object):
 
         tweet_count = 0
         opener = self.create_opener()
-        internal_url = self.get_bbs_internal_url(opener, self.community_id)
-        responses = self.get_responses(opener, internal_url, self.community_id) 
+        internal_url = self.get_bbs_internal_url(opener, self.target_community)
+        responses = self.get_responses(opener, internal_url, self.target_community)
         self.logger.debug("scraped %s responses", len(responses))
         for response in responses:
             if self.is_registered(response):
@@ -218,14 +235,14 @@ class NicoBBS(object):
                 # create message
                 message = "(%s)\n%s" % (response["name"], response["body"])
                 message = self.adjust_message(message)
-                num = response["number"]
-                # message += " " + RESPONSE_URL + self.community_id + "/" + self.page_number(num) + "-#" + num
+                # num = response["number"]
+                # message += " " + RESPONSE_URL + self.target_community + "/" + self.page_number(num) + "-#" + num
                 # sleep before tweet
                 if 0 < tweet_count:
                     self.logger.debug("will sleep %d secs before next tweet..." % TWEET_INTERVAL)
                     time.sleep(TWEET_INTERVAL)
                 if not self.dry_run:
-                    self.twitter.update_status(message)
+                    self.update_status(message)
                 self.logger.debug("[" + message + "]")
                 tweet_count += 1
 
