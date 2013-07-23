@@ -9,8 +9,6 @@ monitor_threshold=$((2*60))
 dbname=$(grep database_name ${basedir}/nicobbs.config | cut -d'=' -f2 | tr -d ' ')
 customenv=${basedir}/nicobbs.env
 
-# export LANG=en_US.UTF-8
-
 start() {
   nohup ${program} >> ${logfile} 2>&1 &
   return $?
@@ -81,9 +79,10 @@ if [ -e ${customenv} ]; then
     source ${customenv}
 fi
 
+# env
+
 case "$1" in
   start)
-        # start
 	stop
         start
         ;;
@@ -112,7 +111,5 @@ case "$1" in
 	;;
   *)
         echo $"Usage: $prog {start|stop|restart|monitor|oneshot|clear|find|switch}"
-        RETVAL=2
+	exit 1
 esac
-
-exit $RETVAL
