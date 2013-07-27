@@ -176,20 +176,33 @@ class NicoBBS(object):
 
         return message
         
-    def adjust_message(self, message):
-        length = len(message)
-        self.logger.debug("message length: %d" % length)
-        adjusted = message
-        # if length <= 119:
-        if length <= 140:
-            self.logger.debug("no need to adjust message.")
-        else:
-            # adjusted = message[0:119-3]
-            adjusted = message[0:140-3]
-            adjusted += "..."
-        # self.logger.debug("adjusted: [%s]" % adjusted)
+    def split_body(self, body, split_length):
+        location = 0
+        bodies = []
+        while location < len(body):
+            bodies.append(body[location:location+split_length])
+            location += split_length
+        return bodies
 
-        return adjusted
+    def create_message(self, name, body):
+        name = "(%s)\n" % name
+        length = len(name) + len(body)
+        messages = []
+        if length <= 140:
+            self.logger.debug("message length: %d" % length)
+            messages.append(name + body)
+        else:
+            bodies = self.split_body(body, 140-len(name)-3*2)
+            counter = 0
+            while counter < len(bodies):
+                if counter == 0:
+                    messages.append(name + bodies[counter] + "...")
+                elif counter < len(bodies)-1:
+                    messages.append(name + "..." + bodies[counter] + "...")
+                else:
+                    messages.append(name + "..." + bodies[counter])
+                counter += 1
+        return messages
 
 # mongo
     # response
@@ -225,20 +238,17 @@ class NicoBBS(object):
                 if not self.dry_run:
                     self.update_response(response)
                 # create message
-                message = "(%s)\n%s" % (response["name"], response["body"])
-                message = self.adjust_message(message)
-                # num = response["number"]
-                # message += " " + RESPONSE_URL + self.target_community +
-                # "/" + self.page_number(num) + "-#" + num
-                # sleep before tweet
-                if 0 < tweet_count:
-                    self.logger.debug("will sleep %d secs before next tweet..."
-                        % TWEET_INTERVAL)
-                    time.sleep(TWEET_INTERVAL)
-                if not self.dry_run:
-                    self.update_status(message)
-                self.logger.debug("[" + message + "]")
-                tweet_count += 1
+                messages = self.create_message(response["name"],
+                        response["body"])
+                for message in messages:
+                    if 0 < tweet_count:
+                        self.logger.debug("will sleep %d secs before next"
+                            " tweet..." % TWEET_INTERVAL)
+                        time.sleep(TWEET_INTERVAL)
+                    if not self.dry_run:
+                        self.update_status(message)
+                    self.logger.debug("[" + message + "]")
+                    tweet_count += 1
 
         self.logger.debug("finished crawling.")
         return
