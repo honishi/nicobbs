@@ -187,11 +187,13 @@ class NicoBBS(object):
     def create_message(self, name, body):
         name = "(%s)\n" % name
         length = len(name) + len(body)
+        self.logger.debug("message length: %d" % length)
         messages = []
         if length <= 140:
-            self.logger.debug("message length: %d" % length)
+            self.logger.debug("no need to split message body")
             messages.append(name + body)
         else:
+            self.logger.debug("split message body")
             bodies = self.split_body(body, 140-len(name)-3*2)
             counter = 0
             while counter < len(bodies):
