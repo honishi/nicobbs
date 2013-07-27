@@ -78,10 +78,10 @@ class NicoBBS(object):
 
     def update_status(self, status):
         try:
-          self.twitter.update_status(status)
+            self.twitter.update_status(status)
         except tweepy.error.TweepError, error:
-          print u'error in post.'
-          print error
+            print u'error in post.'
+            print error
 
     def remove_all(self):
         for status in tweepy.Cursor(self.twitter.user_timeline).items(1000):
