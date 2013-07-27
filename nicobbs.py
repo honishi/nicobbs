@@ -15,6 +15,7 @@ import pymongo
 import tweepy
 
 LOGIN_URL = 'https://secure.nicovideo.jp/secure/login'
+COMMUNITY_TOP_URL = 'http://com.nicovideo.jp/community/'
 COMMUNITY_BBS_URL = 'http://com.nicovideo.jp/bbs/'
 RESPONSE_URL = 'http://dic.nicovideo.jp/b/c/'
 DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
@@ -90,7 +91,7 @@ class NicoBBS(object):
             except tweepy.error.TweepError, error:
                 print u'error in post destroy'
                 print error
-            sys.stdout.flush()
+            # sys.stdout.flush()
 
 # nico nico
     def create_opener(self):
@@ -206,15 +207,55 @@ class NicoBBS(object):
                 counter += 1
         return messages
 
+# reserved live
+    def get_reserved_live(self, opener, community_id):
+        url = COMMUNITY_TOP_URL + community_id
+        self.logger.debug("scraping target: " + url)
+        reader = opener.open(url)
+        rawhtml = reader.read()
+        self.logger.debug("finished to get raw responses.")
+
+        # print rawhtml
+        # os.sys.exit()
+
+        reserved_lives = []
+        soup = BeautifulSoup(rawhtml)
+        community_name = soup.find("h1", {"id": "community_name"}).text
+        lives = soup.findAll("div", {"class": "item"})
+
+        for live in lives:
+            date = live.find("p", {"class": "date"})
+            title = live.find("p", {"class": "title"})
+            if title:
+                anchor = title.find("a")
+                link = anchor["href"]
+                se = re.search("/gate/", link)
+                if se:
+                    date = date.text
+                    title = anchor.text
+                    message = (u"「" + community_name + u"」で生放送「" +
+                        title + u"が予約されました。" + date + u" " + link)
+                    reserved_lives.append({"link":link, "message":message})
+
+        return reserved_lives
+
 # mongo
     # response
     def update_response(self, response):
         self.db.response.update({"communityId": response["communityId"],
             "number": response["number"]}, response, True)
 
-    def is_registered(self, response):
+    def is_response_registered(self, response):
         count = self.db.response.find({"communityId": response["communityId"],
             "number": response["number"]}).count()
+        return True if 0 < count else False
+
+    # reserved live (gate)
+    def update_gate(self, link):
+        self.db.gate.update({"link": link}, {"link": link}, True)
+
+    def is_gate_registered(self, link):
+        count = self.db.gate.find({"link": link}).count()
         return True if 0 < count else False
 
 # main
@@ -227,12 +268,13 @@ class NicoBBS(object):
 
         tweet_count = 0
         opener = self.create_opener()
+
         internal_url = self.get_bbs_internal_url(opener, self.target_community)
         responses = self.get_responses(opener, internal_url,
             self.target_community)
         self.logger.debug("scraped %s responses", len(responses))
         for response in responses:
-            if self.is_registered(response):
+            if self.is_response_registered(response):
                 pass
                 # self.logger.debug("registered: [%s]" % response)
             else:
@@ -251,6 +293,15 @@ class NicoBBS(object):
                         self.update_status(message)
                     self.logger.debug("[" + message + "]")
                     tweet_count += 1
+
+        self.logger.debug("checking new reserved live.")
+        reserved_lives = self.get_reserved_live(opener, self.target_community)
+        for reserved_live in reserved_lives:
+            if self.is_gate_registered(reserved_live["link"]):
+                pass
+            else:
+                self.update_gate(reserved_live["link"])
+                self.update_status(reserved_live["message"])
 
         self.logger.debug("finished crawling.")
         return

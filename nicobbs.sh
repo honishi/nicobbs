@@ -47,6 +47,7 @@ clear() {
   mongo << _eof_
   use ${dbname}
   db.response.remove()
+  db.gate.remove()
 _eof_
 }
 
@@ -54,6 +55,7 @@ find() {
   mongo << _eof_
   use ${dbname}
   db.response.find()
+  db.gate.find()
 _eof_
 }
 
