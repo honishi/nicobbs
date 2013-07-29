@@ -195,15 +195,16 @@ class NicoBBS(object):
             messages.append(name + body)
         else:
             self.logger.debug("split message body")
-            bodies = self.split_body(body, 140-len(name)-3*2)
+            bodies = self.split_body(body, 140-len(name)-5*2)
             counter = 0
             while counter < len(bodies):
                 if counter == 0:
-                    messages.append(name + bodies[counter] + "...")
+                    messages.append(name + bodies[counter] + u" [続く]")
                 elif counter < len(bodies)-1:
-                    messages.append(name + "..." + bodies[counter] + "...")
+                    messages.append(name + u"[続き] " + bodies[counter]
+                        + u" [続く]")
                 else:
-                    messages.append(name + "..." + bodies[counter])
+                    messages.append(name + u"[続き] " + bodies[counter])
                 counter += 1
         return messages
 
