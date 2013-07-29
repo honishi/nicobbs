@@ -31,7 +31,7 @@ class NicoBBS(object):
         logging.config.fileConfig(NICOBBS_CONFIG)
         self.logger = logging.getLogger("root")
         (self.dry_run, self.mail, self.password, self.database_name,
-            self.target_community) = self.get_config()
+            self.target_community, self.ng_words) = self.get_config()
         self.conn = pymongo.Connection() 
         self.db = self.conn[self.database_name]
         self.twitter = self.get_twitter()
@@ -51,12 +51,18 @@ class NicoBBS(object):
         password = config.get("nicobbs", "password")
         database_name = config.get("nicobbs", "database_name")
         target_community = config.get("nicobbs", "target_community")
+        ng_words = config.get("nicobbs", "ng_words")
+        if ng_words == '':
+            ng_words = []
+        else:
+            ng_words = ng_words.split(',')
 
         self.logger.debug("dry_run: %s mail: %s password: *** "
-            "database_name: %s target_community: %s" %
-            (dry_run, mail, database_name, target_community))
+            "database_name: %s target_community: %s ng_words: %s" %
+            (dry_run, mail, database_name, target_community, ng_words))
 
-        return dry_run, mail, password, database_name, target_community
+        return (dry_run, mail, password, database_name,
+                target_community, ng_words)
 
 # twitter
     def get_twitter(self):
@@ -259,6 +265,13 @@ class NicoBBS(object):
         count = self.db.gate.find({"link": link}).count()
         return True if 0 < count else False
 
+# filter
+    def contains_ng_words(self, message):
+        for word in self.ng_words:
+            if re.search(word, message):
+                return True
+        return False
+
 # main
     def page_number(self, strnum):
         intnum = int(strnum)
@@ -275,6 +288,9 @@ class NicoBBS(object):
             self.target_community)
         self.logger.debug("scraped %s responses", len(responses))
         for response in responses:
+            if self.contains_ng_words(response["body"]):
+                self.logger.debug("contains ng word. so skip.")
+                continue
             if self.is_response_registered(response):
                 pass
                 # self.logger.debug("registered: [%s]" % response)

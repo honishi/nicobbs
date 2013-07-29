@@ -4,6 +4,8 @@ mail = user@example.com
 password = password
 database_name = dbname
 target_community = co12345
+# ng_words = ng_word_1,ng_word_2,...
+ng_words = 
 
 [twitter]
 consumer_key = xxx
