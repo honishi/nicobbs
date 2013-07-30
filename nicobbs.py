@@ -241,7 +241,7 @@ class NicoBBS(object):
                     date = date.text
                     title = anchor.text
                     message = (u"「" + community_name + u"」で生放送「" +
-                        title + u"が予約されました。" + date + u" " + link)
+                        title + u"」が予約されました。" + date + u" " + link)
                     reserved_lives.append({"link":link, "message":message})
 
         return reserved_lives
