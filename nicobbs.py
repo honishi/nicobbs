@@ -272,6 +272,12 @@ class NicoBBS(object):
                 return True
         return False
 
+    def contains_too_many_video(self, message):
+        videos = re.findall("sm\d{5,}", message)
+        if 5 < len(videos):
+            return True
+        return False
+
 # main
     def page_number(self, strnum):
         intnum = int(strnum)
@@ -288,19 +294,22 @@ class NicoBBS(object):
             self.target_community)
         self.logger.debug("scraped %s responses", len(responses))
         for response in responses:
-            if self.contains_ng_words(response["body"]):
-                self.logger.debug("contains ng word. so skip.")
+            resname = response["name"]
+            resbody = response["body"]
+            if (self.contains_ng_words(resbody) or
+                self.contains_too_many_video(resbody)):
+                self.logger.debug("contains ng word/too many video.")
+                self.logger.debug("skipped: [" + resbody + "]")
                 continue
             if self.is_response_registered(response):
-                pass
                 # self.logger.debug("registered: [%s]" % response)
+                pass
             else:
                 # self.logger.debug("un-registered: [%s]" % response)
                 if not self.dry_run:
                     self.update_response(response)
                 # create message
-                messages = self.create_message(response["name"],
-                        response["body"])
+                messages = self.create_message(resname, resbody)
                 for message in messages:
                     if 0 < tweet_count:
                         self.logger.debug("will sleep %d secs before next"
