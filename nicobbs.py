@@ -272,9 +272,11 @@ class NicoBBS(object):
                 return True
         return False
 
-    def contains_too_many_video(self, message):
+    def contains_too_many_link(self, message):
         videos = re.findall("sm\d{5,}", message)
-        if 5 < len(videos):
+        communities = re.findall("co\d{5,}", message)
+        limit = 5
+        if limit < len(videos) or limit < len(communities):
             return True
         return False
 
@@ -297,7 +299,7 @@ class NicoBBS(object):
             resname = response["name"]
             resbody = response["body"]
             if (self.contains_ng_words(resbody) or
-                self.contains_too_many_video(resbody)):
+                self.contains_too_many_link(resbody)):
                 self.logger.debug("contains ng word/too many video.")
                 self.logger.debug("skipped: [" + resbody + "]")
                 continue
