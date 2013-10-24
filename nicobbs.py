@@ -25,6 +25,7 @@ CRAWL_INTERVAL = (1*20)
 RETRY_INTERVAL = 10
 TWEET_INTERVAL = 5
 
+
 class NicoBBS(object):
 # life cycle
     def __init__(self):
@@ -32,7 +33,7 @@ class NicoBBS(object):
         self.logger = logging.getLogger("root")
         (self.dry_run, self.mail, self.password, self.database_name,
             self.target_community, self.ng_words) = self.get_config()
-        self.conn = pymongo.Connection() 
+        self.conn = pymongo.Connection()
         self.db = self.conn[self.database_name]
         self.twitter = self.get_twitter()
 
@@ -57,7 +58,8 @@ class NicoBBS(object):
         else:
             ng_words = ng_words.split(',')
 
-        self.logger.debug("dry_run: %s mail: %s password: *** "
+        self.logger.debug(
+            "dry_run: %s mail: %s password: *** "
             "database_name: %s target_community: %s ng_words: %s" %
             (dry_run, mail, database_name, target_community, ng_words))
 
@@ -74,7 +76,8 @@ class NicoBBS(object):
         access_key = config.get("twitter", "access_key")
         access_secret = config.get("twitter", "access_secret")
 
-        self.logger.debug("consumer_key: %s consumer_secret: ***"
+        self.logger.debug(
+            "consumer_key: %s consumer_secret: ***"
             "access_key: %s access_secret: ***" %
             (consumer_key, access_key))
 
@@ -107,14 +110,14 @@ class NicoBBS(object):
         self.logger.debug("finished setting up cookie library.")
 
         # login
-        opener.open(LOGIN_URL, "mail=%s&password=%s" %
-            (self.mail, self.password))
+        opener.open(
+            LOGIN_URL, "mail=%s&password=%s" % (self.mail, self.password))
         self.logger.debug("finished login.")
 
         return opener
 
     def get_bbs_internal_url(self, opener, community_id):
-        # get bbs 
+        # get bbs
         url = COMMUNITY_BBS_URL + community_id
         # self.logger.debug(url)
         reader = opener.open(url)
@@ -131,7 +134,7 @@ class NicoBBS(object):
         return internal_url
 
     def get_responses(self, opener, url, community_id):
-        # get bbs 
+        # get bbs
         # self.logger.debug(url)
         reader = opener.open(url)
         rawhtml = reader.read()
@@ -153,7 +156,8 @@ class NicoBBS(object):
             # http://www.python.jp/doc/2.6/library/re.html#vs
             date = "n/a"
             se = re.search(DATE_REGEXP, reshead.text.strip())
-            if se: date = se.group(1)
+            if se:
+                date = se.group(1)
             hash_id = re.search(RESID_REGEXP, reshead.text.strip()).group(1)
             body = "".join([unicode(x) for x in resbodies[index]]).strip()
             body = self.sanitize_message(body)
@@ -182,7 +186,7 @@ class NicoBBS(object):
         message = re.sub("&lt;", "<", message)
 
         return message
-        
+
     def split_body(self, body, split_length):
         location = 0
         bodies = []
@@ -207,8 +211,8 @@ class NicoBBS(object):
                 if counter == 0:
                     messages.append(name + bodies[counter] + u" [続く]")
                 elif counter < len(bodies)-1:
-                    messages.append(name + u"[続き] " + bodies[counter]
-                        + u" [続く]")
+                    messages.append(
+                        name + u"[続き] " + bodies[counter] + u" [続く]")
                 else:
                     messages.append(name + u"[続き] " + bodies[counter])
                 counter += 1
@@ -240,21 +244,24 @@ class NicoBBS(object):
                 if se:
                     date = date.text
                     title = anchor.text
-                    message = (u"「" + community_name + u"」で生放送「" +
-                        title + u"」が予約されました。" + date + u" " + link)
-                    reserved_lives.append({"link":link, "message":message})
+                    message = (
+                        u"「" + community_name + u"」で生放送「" + title +
+                        u"」が予約されました。" + date + u" " + link)
+                    reserved_lives.append({"link": link, "message": message})
 
         return reserved_lives
 
 # mongo
     # response
     def update_response(self, response):
-        self.db.response.update({"communityId": response["communityId"],
-            "number": response["number"]}, response, True)
+        self.db.response.update(
+            {"communityId": response["communityId"],
+             "number": response["number"]}, response, True)
 
     def is_response_registered(self, response):
-        count = self.db.response.find({"communityId": response["communityId"],
-            "number": response["number"]}).count()
+        count = self.db.response.find(
+            {"communityId": response["communityId"],
+             "number": response["number"]}).count()
         return True if 0 < count else False
 
     # reserved live (gate)
@@ -292,14 +299,14 @@ class NicoBBS(object):
         opener = self.create_opener()
 
         internal_url = self.get_bbs_internal_url(opener, self.target_community)
-        responses = self.get_responses(opener, internal_url,
-            self.target_community)
+        responses = self.get_responses(
+            opener, internal_url, self.target_community)
         self.logger.debug("scraped %s responses", len(responses))
         for response in responses:
             resname = response["name"]
             resbody = response["body"]
             if (self.contains_ng_words(resbody) or
-                self.contains_too_many_link(resbody)):
+                    self.contains_too_many_link(resbody)):
                 self.logger.debug("contains ng word/too many video.")
                 self.logger.debug("skipped: [" + resbody + "]")
                 continue
@@ -314,8 +321,9 @@ class NicoBBS(object):
                 messages = self.create_message(resname, resbody)
                 for message in messages:
                     if 0 < tweet_count:
-                        self.logger.debug("will sleep %d secs before next"
-                            " tweet..." % TWEET_INTERVAL)
+                        self.logger.debug(
+                            "will sleep %d secs before next tweet..." %
+                            TWEET_INTERVAL)
                         time.sleep(TWEET_INTERVAL)
                     if not self.dry_run:
                         self.update_status(message)
