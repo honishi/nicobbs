@@ -21,7 +21,7 @@ RESPONSE_URL = 'http://dic.nicovideo.jp/b/c/'
 DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
 RESID_REGEXP = 'ID: (.+)'
 NICOBBS_CONFIG = os.path.dirname(os.path.abspath(__file__)) + '/nicobbs.config'
-CRAWL_INTERVAL = (1*60)
+CRAWL_INTERVAL = (1*20)
 RETRY_INTERVAL = 10
 TWEET_INTERVAL = 5
 
