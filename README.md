@@ -1,16 +1,14 @@
 nicobbs to twitter
 ==
-![anokoku](https://dl.dropboxusercontent.com/u/444711/github.com/honishi/nicobbs/ankoku.jpeg)
-
-scraping niconama bbs, and update status to twitter
+scraping niconama bbs, and update status to twitter.
 
 sample
 --
-![tweets](https://dl.dropboxusercontent.com/u/444711/github.com/honishi/nicobbs/tweets.png)
+![tweets](./sample/tweets.png)
 
 requirements
 --
-1. python 2.6-
+1. python 2.7.x-
 2. mongodb
 
 setup
@@ -24,33 +22,39 @@ $ sudo apt-get install libxml2-dev libxslt-dev
 $ pip install -r requirements.txt
 ````
 
-tuning mongo
+configure mongo
 --
+database indexes are needed for proper query execution plan.
 ````
+// (optional) check current scheme
 $ mongo
-$ show dbs
-$ use nicobbs
-$ show collections
+show dbs
+use dev-nicobbs-v2
+show collections
 
-# response
-$ db.response.find()
-$ db.response.getIndexes()
-$ db.response.ensureIndex({communityId:1, number:1})
-$ db.response.getIndexes()
+db.response.find()
+db.live.find()
 
-# gate
-$ db.gate.find()
-$ db.gate.getIndexes()
-$ db.gate.ensureIndex({link:1})
-$ db.gate.getIndexes()
+db.response.getIndexes()
+db.live.getIndexes()
+
+// (required) create index for 'response' collection
+db.response.ensureIndex({community:1, number:1})
+db.response.ensureIndex({community:1, status:1})
+
+// (required) create index for 'live' collection
+db.live.ensureIndex({community:1, link:1})
+db.live.ensureIndex({community:1, status:1})
 ````
 
 kick
 --
+start.
 ````
-# start
 $ ./nicobbs.sh start
-# stop
+````
+stop.
+````
 $ ./nicobss.sh stop
 ````
 
@@ -58,6 +62,16 @@ monitoring example using crontab
 --
 	# monitoring nicoalert
 	* * * * * /path/to/nicobbs/nicobbs.sh monitor >> /path/to/nicobbs/log/monitor.log 2>&1
+
+snippet for me
+--
+drop database
+````
+$ mongo
+show dbs
+use dev-nicobbs-v2
+db.dropDatabase()
+````
 
 license
 --

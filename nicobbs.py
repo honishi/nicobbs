@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+# import sys
 import logging
 import logging.config
 import ConfigParser
@@ -9,6 +10,7 @@ import urllib2
 import cookielib
 import re
 import time
+import json
 
 from bs4 import BeautifulSoup
 import pymongo
@@ -21,9 +23,29 @@ RESPONSE_URL = 'http://dic.nicovideo.jp/b/c/'
 DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
 RESID_REGEXP = 'ID: (.+)'
 NICOBBS_CONFIG = os.path.dirname(os.path.abspath(__file__)) + '/nicobbs.config'
-CRAWL_INTERVAL = (1*20)
-RETRY_INTERVAL = 10
-TWEET_INTERVAL = 5
+CRAWL_INTERVAL = 30
+TWEET_INTERVAL = 3
+
+# responses/lives just crawled from the web
+STATUS_UNPROCESSED = "UNPROCESSED"
+# spam responses
+STATUS_SPAM = "SPAM"
+# duplicate status updates
+STATUS_DUPLICATE = "DUPLICATE"
+# responses/lives that are failed to be posted to twitter. currently not used
+STATUS_FAILED = "FAILED"
+# reponses/lives that are successfully posted to twitter
+STATUS_COMPLETED = "COMPLETED"
+
+LOG_SEPARATOR = "---------- ---------- ---------- ---------- ----------"
+
+
+class TwitterDuplicateStatusUpdateError(Exception):
+    pass
+
+
+class TwitterStatusUpdateError(Exception):
+    pass
 
 
 class NicoBBS(object):
@@ -31,91 +53,108 @@ class NicoBBS(object):
     def __init__(self):
         logging.config.fileConfig(NICOBBS_CONFIG)
         self.logger = logging.getLogger("root")
-        (self.dry_run, self.mail, self.password, self.database_name,
-            self.target_community, self.ng_words) = self.get_config()
-        self.conn = pymongo.Connection()
-        self.db = self.conn[self.database_name]
-        self.twitter = self.get_twitter()
+
+        (self.mail, self.password, database_name, self.target_communities, self.ng_words) = (
+            self.get_basic_config())
+        self.logger.debug(
+            "mail: %s password: xxxxxxxxxx database_name: %s "
+            "target_communities: %s ng_words: %s" %
+            (self.mail, database_name, self.target_communities, self.ng_words))
+
+        self.consumer_key = {}
+        self.consumer_secret = {}
+        self.access_key = {}
+        self.access_secret = {}
+        for community in self.target_communities:
+            (self.consumer_key[community], self.consumer_secret[community],
+             self.access_key[community], self.access_secret[community]) = (
+                self.get_community_config(community))
+            self.logger.debug("*** community: " + community)
+            self.logger.debug(
+                "consumer_key: %s consumer_secret: xxxxxxxxxx" % self.consumer_key[community])
+            self.logger.debug(
+                "access_key: %s access_secret: xxxxxxxxxx" % self.access_key[community])
+
+        self.connection = pymongo.Connection()
+        self.database = self.connection[database_name]
 
     def __del__(self):
-        self.conn.disconnect()
+        self.connection.disconnect()
 
 # utility
-    def get_config(self):
+    def get_basic_config(self):
         config = ConfigParser.ConfigParser()
         config.read(NICOBBS_CONFIG)
-        if config.get("nicobbs", "dry_run").lower() == "true":
-            dry_run = True
-        else:
-            dry_run = False
+
         mail = config.get("nicobbs", "mail")
         password = config.get("nicobbs", "password")
         database_name = config.get("nicobbs", "database_name")
-        target_community = config.get("nicobbs", "target_community")
+        target_communities = config.get("nicobbs", "target_communities").split(',')
         ng_words = config.get("nicobbs", "ng_words")
         if ng_words == '':
             ng_words = []
         else:
             ng_words = ng_words.split(',')
 
-        self.logger.debug(
-            "dry_run: %s mail: %s password: *** "
-            "database_name: %s target_community: %s ng_words: %s" %
-            (dry_run, mail, database_name, target_community, ng_words))
+        return (mail, password, database_name, target_communities, ng_words)
 
-        return (dry_run, mail, password, database_name,
-                target_community, ng_words)
-
-# twitter
-    def get_twitter(self):
+    def get_community_config(self, community):
         config = ConfigParser.ConfigParser()
         config.read(NICOBBS_CONFIG)
+        section = community
 
-        consumer_key = config.get("twitter", "consumer_key")
-        consumer_secret = config.get("twitter", "consumer_secret")
-        access_key = config.get("twitter", "access_key")
-        access_secret = config.get("twitter", "access_secret")
+        consumer_key = config.get(section, "consumer_key")
+        consumer_secret = config.get(section, "consumer_secret")
+        access_key = config.get(section, "access_key")
+        access_secret = config.get(section, "access_secret")
 
-        self.logger.debug(
-            "consumer_key: %s consumer_secret: ***"
-            "access_key: %s access_secret: ***" %
-            (consumer_key, access_key))
+        return (consumer_key, consumer_secret, access_key, access_secret)
 
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        auth.set_access_token(access_key, access_secret)
+# twitter
+    def update_twitter_status(self, community, status):
+        auth = tweepy.OAuthHandler(self.consumer_key[community], self.consumer_secret[community])
+        auth.set_access_token(self.access_key[community], self.access_secret[community])
 
-        return tweepy.API(auth)
+        # for test; simulating post error like case of api limit
+        # raise TwitterStatusUpdateError
 
-    def update_status(self, status):
         try:
-            self.twitter.update_status(status)
+            tweepy.API(auth).update_status(status)
         except tweepy.error.TweepError, error:
-            print u'error in post.'
-            print error
+            self.logger.debug("twitter update error: %s" % error)
+            # error.reason is the list object like following:
+            #   [{"message":"Sorry, that page does not exist","code":34}]
+            # see the following references for details:
+            #   - https://dev.twitter.com/docs/error-codes-responses
+            #   - ./tweepy/error.py
 
-    def remove_all(self):
-        for status in tweepy.Cursor(self.twitter.user_timeline).items(1000):
-            try:
-                self.twitter.destroy_status(status.id)
-            except tweepy.error.TweepError, error:
-                print u'error in post destroy'
-                print error
-            # sys.stdout.flush()
+            # replace single quatation with double quatation to parse string properly
+            normalized_reasons_string = re.sub("u'(.+?)'", r'"\1"', error.reason)
+
+            reasons = json.loads(normalized_reasons_string)
+            print reasons
+            for reason in reasons:
+                print reason
+                if reason["code"] == 187:
+                    # 'Status is a duplicate'
+                    raise TwitterDuplicateStatusUpdateError
+            raise TwitterStatusUpdateError
 
 # nico nico
     def create_opener(self):
         # cookie
         cookiejar = cookielib.CookieJar()
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
-        self.logger.debug("finished setting up cookie library.")
+        # self.logger.debug("finished setting up cookie library")
 
         # login
         opener.open(
             LOGIN_URL, "mail=%s&password=%s" % (self.mail, self.password))
-        self.logger.debug("finished login.")
+        self.logger.debug("finished login")
 
         return opener
 
+# bbs
     def get_bbs_internal_url(self, opener, community_id):
         # get bbs
         url = COMMUNITY_BBS_URL + community_id
@@ -133,15 +172,12 @@ class NicoBBS(object):
 
         return internal_url
 
-    def get_responses(self, opener, url, community_id):
-        # get bbs
+    def get_bbs_responses(self, opener, url, community):
         # self.logger.debug(url)
         reader = opener.open(url)
         rawhtml = reader.read()
         self.logger.debug("finished to get raw responses.")
-
-        # print rawhtml
-        # os.sys.exit()
+        # self.logger.debug(rawhtml)
 
         soup = BeautifulSoup(rawhtml)
         resheads = soup.findAll("dt", {"class": "reshead"})
@@ -152,8 +188,7 @@ class NicoBBS(object):
             # extract
             number = reshead.find("a", {"class": "resnumhead"})["name"]
             name = reshead.find("span", {"class": "name"}).text.strip()
-            # use "search", instead of "mathch"
-            # http://www.python.jp/doc/2.6/library/re.html#vs
+            # use "search", instead of "mathch". http://www.python.jp/doc/2.6/library/re.html#vs
             date = "n/a"
             se = re.search(DATE_REGEXP, reshead.text.strip())
             if se:
@@ -167,18 +202,19 @@ class NicoBBS(object):
 
             # append
             response = {
-                "communityId": community_id,
+                "community": community,
                 "number": number,
                 "name": name,
                 "date": date,
                 "hash": hash_id,
-                "body": body
+                "body": body,
+                "status": STATUS_UNPROCESSED
             }
             responses.append(response)
 
         return responses
 
-# utility
+# message utility
     def sanitize_message(self, message):
         message = re.sub("<br/>", "\n", message)
         message = re.sub("<.*?>", "", message)
@@ -219,15 +255,15 @@ class NicoBBS(object):
         return messages
 
 # reserved live
-    def get_reserved_live(self, opener, community_id):
-        url = COMMUNITY_TOP_URL + community_id
+    def get_community_reserved_live(self, opener, community):
+        url = COMMUNITY_TOP_URL + community
         self.logger.debug("scraping target: " + url)
         reader = opener.open(url)
         rawhtml = reader.read()
-        self.logger.debug("finished to get raw responses.")
+        self.logger.debug("finished to get raw community top page.")
 
-        # print rawhtml
-        # os.sys.exit()
+        # self.logger.debug(rawhtml)
+        # sys.exit()
 
         reserved_lives = []
         soup = BeautifulSoup(rawhtml)
@@ -242,35 +278,58 @@ class NicoBBS(object):
                 link = anchor["href"]
                 se = re.search("/gate/", link)
                 if se:
-                    date = date.text
-                    title = anchor.text
-                    message = (
-                        u"「" + community_name + u"」で生放送「" + title +
-                        u"」が予約されました。" + date + u" " + link)
-                    reserved_lives.append({"link": link, "message": message})
+                    reserved_live = {"community": community,
+                                     "link": link,
+                                     "community_name": community_name,
+                                     "date": date.text,
+                                     "title": anchor.text,
+                                     "status": STATUS_UNPROCESSED}
+                    reserved_lives.append(reserved_live)
 
         return reserved_lives
 
 # mongo
     # response
-    def update_response(self, response):
-        self.db.response.update(
-            {"communityId": response["communityId"],
-             "number": response["number"]}, response, True)
+# TODO: database index
+    def register_response(self, response):
+        self.database.response.update(
+            {"community": response["community"], "number": response["number"]}, response, True)
 
     def is_response_registered(self, response):
-        count = self.db.response.find(
-            {"communityId": response["communityId"],
-             "number": response["number"]}).count()
+        count = self.database.response.find(
+            {"community": response["community"], "number": response["number"]}).count()
         return True if 0 < count else False
 
-    # reserved live (gate)
-    def update_gate(self, link):
-        self.db.gate.update({"link": link}, {"link": link}, True)
+    def get_responses_with_community_and_status(self, community, status):
+        responses = self.database.response.find(
+            {"community": community, "status": status},
+            sort=[("number", 1)])
+        return responses
 
-    def is_gate_registered(self, link):
-        count = self.db.gate.find({"link": link}).count()
+    def update_response_status(self, response, status):
+        self.database.response.update(
+            {"community": response["community"], "number": response["number"]},
+            {"$set": {"status": status}})
+
+    # reserved live
+# TODO: database index
+    def register_live(self, live):
+        self.database.live.update(
+            {"community": live["community"], "link": live["link"]}, live, True)
+
+    def is_live_registered(self, live):
+        count = self.database.live.find(
+            {"community": live["community"], "link": live["link"]}).count()
         return True if 0 < count else False
+
+    def get_lives_with_community_and_status(self, community, status):
+        lives = self.database.live.find({"community": community, "status": status})
+        return lives
+
+    def update_live_status(self, live, status):
+        self.database.live.update(
+            {"community": live["community"], "link": live["link"]},
+            {"$set": {"status": status}})
 
 # filter
     def contains_ng_words(self, message):
@@ -288,77 +347,137 @@ class NicoBBS(object):
         return False
 
 # main
-    def page_number(self, strnum):
-        intnum = int(strnum)
-        return str(intnum - ((intnum-1) % 30))
+    # def page_number(self, strnum):
+    #     intnum = int(strnum)
+    #     return str(intnum - ((intnum-1) % 30))
 
-    def crawl(self):
-        self.logger.debug("started crawling.")
+    def crawl_bbs_response(self, opener, community):
+        self.logger.debug("*** crawling responses, community: %s" % community)
 
-        tweet_count = 0
-        opener = self.create_opener()
-
-        internal_url = self.get_bbs_internal_url(opener, self.target_community)
-        responses = self.get_responses(
-            opener, internal_url, self.target_community)
-        self.logger.debug("scraped %s responses", len(responses))
+        internal_url = self.get_bbs_internal_url(opener, community)
+        responses = self.get_bbs_responses(opener, internal_url, community)
+        self.logger.debug("scraped %s responses" % len(responses))
         for response in responses:
-            resname = response["name"]
-            resbody = response["body"]
-            if (self.contains_ng_words(resbody) or
-                    self.contains_too_many_link(resbody)):
-                self.logger.debug("contains ng word/too many video.")
-                self.logger.debug("skipped: [" + resbody + "]")
-                continue
             if self.is_response_registered(response):
-                # self.logger.debug("registered: [%s]" % response)
-                pass
+                self.logger.debug("already registered: #%s" % response["number"])
             else:
-                # self.logger.debug("un-registered: [%s]" % response)
-                if not self.dry_run:
-                    self.update_response(response)
-                # create message
-                messages = self.create_message(resname, resbody)
-                for message in messages:
-                    if 0 < tweet_count:
-                        self.logger.debug(
-                            "will sleep %d secs before next tweet..." %
-                            TWEET_INTERVAL)
-                        time.sleep(TWEET_INTERVAL)
-                    if not self.dry_run:
-                        self.update_status(message)
-                    self.logger.debug("[" + message + "]")
+                self.register_response(response)
+                self.logger.debug("registered: #%s" % response["number"])
+
+        self.logger.debug("completed to crawl responses")
+
+    def tweet_bbs_response(self, community):
+        unprocessed_responses = self.get_responses_with_community_and_status(
+            community, STATUS_UNPROCESSED)
+        tweet_count = 0
+
+        self.logger.debug("*** processing responses, community: %s unprocessed: %d" %
+                          (community, unprocessed_responses.count()))
+
+        for response in unprocessed_responses:
+            self.logger.debug("processing response #%s" % response["number"])
+
+            response_name = response["name"]
+            response_body = response["body"]
+
+            if (self.contains_ng_words(response_body) or
+                    self.contains_too_many_link(response_body)):
+                self.logger.debug(
+                    "response contains ng word/too many video, so skip: [%s]" % response_body)
+                self.update_response_status(response, STATUS_SPAM)
+                continue
+
+            # create message
+            messages = self.create_message(response_name, response_body)
+            for message in messages:
+                if 0 < tweet_count:
+                    self.logger.debug("sleeping %d secs before next tweet..." % TWEET_INTERVAL)
+                    time.sleep(TWEET_INTERVAL)
+                try:
+                    self.update_twitter_status(community, message)
+                except TwitterDuplicateStatusUpdateError, error:
+                    # message is already posted to twitter. so response status should be
+                    # changed from 'unprocessed' to other, in order to avoid reprocessing
+                    self.logger.debug("twitter status update error, duplicate: %s" % error)
+                    self.update_response_status(response, STATUS_DUPLICATE)
+                    break
+                except TwitterStatusUpdateError, error:
+                    # twitter error case including api limit
+                    # response status should not be changed here for future retrying
+                    self.logger.debug("twitter status update error, unknown: %s" % error)
+                    break
+                else:
+                    self.update_response_status(response, STATUS_COMPLETED)
+                    self.logger.debug("status updated: [%s]" % message)
                     tweet_count += 1
 
-        self.logger.debug("checking new reserved live.")
-        reserved_lives = self.get_reserved_live(opener, self.target_community)
+        self.logger.debug("completed to process responses")
+
+    def crawl_reserved_live(self, opener, community):
+        self.logger.debug("*** crawling new reserved lives, community: %s" % community)
+        reserved_lives = self.get_community_reserved_live(opener, community)
+        self.logger.debug("scraped %s reserved lives" % len(reserved_lives))
         for reserved_live in reserved_lives:
-            if self.is_gate_registered(reserved_live["link"]):
-                pass
+            if self.is_live_registered(reserved_live):
+                self.logger.debug("already registered: %s" % reserved_live["link"])
             else:
-                self.update_gate(reserved_live["link"])
-                self.update_status(reserved_live["message"])
+                self.register_live(reserved_live)
+                self.logger.debug("registered: %s" % reserved_live["link"])
 
-        self.logger.debug("finished crawling.")
-        return
+        self.logger.debug("completed to crawl reserved lives")
 
-    def go(self):
+    def tweet_reserved_live(self, community):
+        unprocessed_lives = self.get_lives_with_community_and_status(
+            community, STATUS_UNPROCESSED)
+
+        self.logger.debug("*** processing lives, community: %s unprocessed: %d" %
+                          (community, unprocessed_lives.count()))
+
+        for live in unprocessed_lives:
+            self.logger.debug("processing live %s" % live["link"])
+
+            message = (u"「" + live["community_name"] + u"」で生放送「" + live["title"] +
+                       u"」が予約されました。" + live["date"] + u" " + live["link"])
+            try:
+                self.update_twitter_status(community, message)
+            except TwitterDuplicateStatusUpdateError, error:
+                self.logger.debug("twitter status update error, duplicate: %s", error)
+                self.update_live_status(live, STATUS_DUPLICATE)
+                break
+            except TwitterStatusUpdateError, error:
+                # twitter error case including api limit
+                # response status should not be changed here for future retrying
+                self.logger.debug("twitter status update error, unknown")
+                break
+            else:
+                self.update_live_status(live, STATUS_COMPLETED)
+                self.logger.debug("status updated: [%s]" % message)
+
+        self.logger.debug("completed to process reserved lives")
+
+    def start(self):
         # inifinite loop
         while True:
             try:
-                # crawl
-                self.logger.debug("**********")
-                self.crawl()
-                # sleep
-                self.logger.debug("will sleep %d secs." % CRAWL_INTERVAL)
-                time.sleep(CRAWL_INTERVAL)
+                self.logger.debug(LOG_SEPARATOR)
+                opener = self.create_opener()
+                for community in self.target_communities:
+                    self.logger.debug(LOG_SEPARATOR)
+                    try:
+                        self.crawl_bbs_response(opener, community)
+                        self.tweet_bbs_response(community)
+                        self.crawl_reserved_live(opener, community)
+                        self.tweet_reserved_live(community)
+                    except Exception, error:
+                        self.logger.debug("*** caught error: %s" % error)
             except Exception, error:
-                self.logger.debug(error)
-                self.logger.debug(
-                    "caught error, will retry %s seconds later..." %
-                    RETRY_INTERVAL)
-                time.sleep(RETRY_INTERVAL)
+                self.logger.debug("*** caught error: %s" % error)
+
+            self.logger.debug(LOG_SEPARATOR)
+            self.logger.debug("*** sleeping %d secs..." % CRAWL_INTERVAL)
+            time.sleep(CRAWL_INTERVAL)
 
 if __name__ == "__main__":
     nicobbs = NicoBBS()
-    nicobbs.go()
+    nicobbs.start()
+    # nicobbs.update_twitter_status("co1827022", "test")
