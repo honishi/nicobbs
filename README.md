@@ -25,24 +25,29 @@ $ pip install -r requirements.txt
 configure mongo
 --
 database indexes are needed for proper query execution plan.
+
+(optional) check current scheme.
 ````
-// (optional) check current scheme
 $ mongo
 show dbs
 use dev-nicobbs-v2
 show collections
 
+// we use two collections that are named 'response' and 'live'
 db.response.find()
-db.live.find()
-
 db.response.getIndexes()
+db.live.find()
 db.live.getIndexes()
+````
 
-// (required) create index for 'response' collection
+(required) create index for 'response' collection.
+````
 db.response.ensureIndex({community:1, number:1})
 db.response.ensureIndex({community:1, status:1})
+````
 
-// (required) create index for 'live' collection
+(required) create index for 'live' collection.
+````
 db.live.ensureIndex({community:1, link:1})
 db.live.ensureIndex({community:1, status:1})
 ````
@@ -62,16 +67,6 @@ monitoring example using crontab
 --
 	# monitoring nicoalert
 	* * * * * /path/to/nicobbs/nicobbs.sh monitor >> /path/to/nicobbs/log/monitor.log 2>&1
-
-snippet for me
---
-drop database
-````
-$ mongo
-show dbs
-use dev-nicobbs-v2
-db.dropDatabase()
-````
 
 license
 --

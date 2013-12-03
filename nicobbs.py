@@ -12,6 +12,7 @@ import re
 import time
 import json
 
+import nicoutil
 from bs4 import BeautifulSoup
 import pymongo
 import tweepy
@@ -195,7 +196,7 @@ class NicoBBS(object):
                 date = se.group(1)
             hash_id = re.search(RESID_REGEXP, reshead.text.strip()).group(1)
             body = "".join([unicode(x) for x in resbodies[index]]).strip()
-            body = self.sanitize_message(body)
+            body = self.prefilter_message(body)
             # self.logger.debug(u"[%s] [%s] [%s] [\n%s\n]".encode('utf_8') %
             # (number, name, date, body))
             index += 1
@@ -215,7 +216,7 @@ class NicoBBS(object):
         return responses
 
 # message utility
-    def sanitize_message(self, message):
+    def prefilter_message(self, message):
         message = re.sub("<br/>", "\n", message)
         message = re.sub("<.*?>", "", message)
         message = re.sub("&gt;", ">", message)
@@ -223,36 +224,10 @@ class NicoBBS(object):
 
         return message
 
-    def split_body(self, body, split_length):
-        location = 0
-        bodies = []
-        while location < len(body):
-            bodies.append(body[location:location+split_length])
-            location += split_length
-        return bodies
-
-    def create_message(self, name, body):
-        name = "(%s)\n" % name
-        length = len(name) + len(body)
-        self.logger.debug("message length: %d" % length)
-        messages = []
-        if length <= 140:
-            self.logger.debug("no need to split message body")
-            messages.append(name + body)
-        else:
-            self.logger.debug("split message body")
-            bodies = self.split_body(body, 140-len(name)-5*2)
-            counter = 0
-            while counter < len(bodies):
-                if counter == 0:
-                    messages.append(name + bodies[counter] + u" [続く]")
-                elif counter < len(bodies)-1:
-                    messages.append(
-                        name + u"[続き] " + bodies[counter] + u" [続く]")
-                else:
-                    messages.append(name + u"[続き] " + bodies[counter])
-                counter += 1
-        return messages
+    def postfilter_message(self, message):
+        message = re.sub(u"\(省略しています。全て読むにはこのリンクをクリック！\)",
+                         u"(省略)", message)
+        return message
 
 # reserved live
     def get_community_reserved_live(self, opener, community):
@@ -290,7 +265,6 @@ class NicoBBS(object):
 
 # mongo
     # response
-# TODO: database index
     def register_response(self, response):
         self.database.response.update(
             {"community": response["community"], "number": response["number"]}, response, True)
@@ -312,7 +286,6 @@ class NicoBBS(object):
             {"$set": {"status": status}})
 
     # reserved live
-# TODO: database index
     def register_live(self, live):
         self.database.live.update(
             {"community": live["community"], "link": live["link"]}, live, True)
@@ -357,13 +330,20 @@ class NicoBBS(object):
         internal_url = self.get_bbs_internal_url(opener, community)
         responses = self.get_bbs_responses(opener, internal_url, community)
         self.logger.debug("scraped %s responses" % len(responses))
+
+        skipped_responses = []
+        registered_responses = []
+
         for response in responses:
+            response_number = "#%s" % response["number"]
             if self.is_response_registered(response):
-                self.logger.debug("already registered: #%s" % response["number"])
+                skipped_responses.append(response_number)
             else:
                 self.register_response(response)
-                self.logger.debug("registered: #%s" % response["number"])
+                registered_responses.append(response_number)
 
+        self.logger.debug("skipped: %s" % skipped_responses)
+        self.logger.debug("registered: %s" % registered_responses)
         self.logger.debug("completed to crawl responses")
 
     def tweet_bbs_response(self, community):
@@ -387,16 +367,19 @@ class NicoBBS(object):
                 self.update_response_status(response, STATUS_SPAM)
                 continue
 
-            # create message
-            messages = self.create_message(response_name, response_body)
-            for message in messages:
+            # create statuses
+            response_body = self.postfilter_message(response_body)
+            statuses = nicoutil.create_twitter_statuses(
+                u'(' + response_name + u')\n', u'[続き] ', response_body, u' [続く]')
+
+            for status in statuses:
                 if 0 < tweet_count:
                     self.logger.debug("sleeping %d secs before next tweet..." % TWEET_INTERVAL)
                     time.sleep(TWEET_INTERVAL)
                 try:
-                    self.update_twitter_status(community, message)
+                    self.update_twitter_status(community, status)
                 except TwitterDuplicateStatusUpdateError, error:
-                    # message is already posted to twitter. so response status should be
+                    # status is already posted to twitter. so response status should be
                     # changed from 'unprocessed' to other, in order to avoid reprocessing
                     self.logger.debug("twitter status update error, duplicate: %s" % error)
                     self.update_response_status(response, STATUS_DUPLICATE)
@@ -408,7 +391,7 @@ class NicoBBS(object):
                     break
                 else:
                     self.update_response_status(response, STATUS_COMPLETED)
-                    self.logger.debug("status updated: [%s]" % message)
+                    self.logger.debug("status updated: [%s]" % status)
                     tweet_count += 1
 
         self.logger.debug("completed to process responses")
@@ -419,7 +402,7 @@ class NicoBBS(object):
         self.logger.debug("scraped %s reserved lives" % len(reserved_lives))
         for reserved_live in reserved_lives:
             if self.is_live_registered(reserved_live):
-                self.logger.debug("already registered: %s" % reserved_live["link"])
+                self.logger.debug("skipped: %s" % reserved_live["link"])
             else:
                 self.register_live(reserved_live)
                 self.logger.debug("registered: %s" % reserved_live["link"])
