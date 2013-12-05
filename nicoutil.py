@@ -6,6 +6,11 @@ import re
 TWITTER_STATUS_MAX_LENGTH = 140
 TCO_URL_LENGTH = 23
 
+REGEXP_VIDEO = r'sm\d{3,}'
+REGEXP_LIVE = r'lv\d{3,}'
+BASE_URL_VIDEO = u'http://www.nicovideo.jp/watch/'
+BASE_URL_LIVE = u'http://live.nicovideo.jp/watch/'
+
 # regexp for http(s), http://www.megasoft.co.jp/mifes/seiki/s310.html
 # regexp for twitter account, http://stackoverflow.com/a/4424288
 REGEXP_HTTP = r'https?://[\w/:%#\$&\?\(\)~\.=\+\-]+'
@@ -52,9 +57,11 @@ def create_twitter_statuses(header, continued_mark, body, continue_mark):
     available_length = TWITTER_STATUS_MAX_LENGTH - len(header + continued_mark + continue_mark)
     # print available_length
 
-    # print 'before replace \\n$: [' + body + ']'
+    # print 'before replace: [' + body + ']'
+    body = re.sub(r'(' + REGEXP_VIDEO + r')', BASE_URL_VIDEO + r'\1', body)
+    body = re.sub(r'(' + REGEXP_LIVE + r')', BASE_URL_LIVE + r'\1', body)
     body = re.sub(r'\n+$', '', body)
-    # print 'after replace \\n$: [' + body + ']'
+    # print 'after replace: [' + body + ']'
 
     statuses_with_body = []
     status_buffer = u""
@@ -108,7 +115,7 @@ def create_twitter_statuses(header, continued_mark, body, continue_mark):
     return create_finalized_statuses(statuses_with_body, header, continued_mark, continue_mark)
 
 if __name__ == "__main__":
-    original_body = """ \
+    original_body = """\
 　あるところに、牛を持っている百姓がありました。その牛は、もう年をとっていました。長い年の間、その百姓のために重い荷をつけて働いたのであります。そして、いまでも、なお働いていたのであったけれど、なんにしても、年をとってしまっては、ちょうど人間と同じように、若い時分ほど働くことはできなかったのです。
 　この無理もないことを、百姓はあわれとは思いませんでした。そして、いままで自分たちのために働いてくれた牛を、大事にしてやろうとは思わなかったのであります。
 「こんな役にたたないやつは、早く、どこかへやってしまって、若いじょうぶな牛と換えよう。」と思いました。
@@ -117,7 +124,7 @@ if __name__ == "__main__":
 　ある、うす寒い日のこと、百姓は、話に、馬の市が四里ばかり離れた、小さな町で開かれたということを聞いたので、喜んで、小舎の中から、年とった牛を引き出して、若い牛と交換してくるために町へと出かけたのでした。
 　百姓は、自分たちといっしょに苦労をした、この年をとった牛に分かれるのを、格別悲しいとも感じなかったのであるが、牛は、さもこの家から離れてゆくのが悲しそうに見えて、なんとなく、歩く足つきも鈍かったのでありました。
 """
-    test_body = """ \
+    test_body = """\
 　あるところに、牛を持っている百姓がありました。その牛は、もう年をとっていました。長い年の間、その百姓のために重い荷をつけて働いたのであります。そして、いまでも、なお働いていたのであったけれど、なんにしても、年をとってしまっては、@abcdちょうど人間と同じように、若い時分ほど働くことはできなかったのです。
 　この無理もないことを、百姓はあわれとは思いませんでした。そして、いままで自分たちのために働いてくれた牛を、大事にしてやろうとは思わなかったのでhttp://example.comあります。
 「こんな役にたたないやつは、早く、どこかへやってしまって、若いじょうぶな牛と換えよう。」と思いました。
@@ -126,17 +133,21 @@ if __name__ == "__main__":
 　ある、うす寒い日のこと、百姓は、話に、馬の市が四里ばかり離れた、小さな町で開かれたということを聞いたので、喜んで、小舎の中から、年とった牛を引き出して、若い牛と交換してくるために町へと出かけたのでした。
 　百姓は、自分たちといっしょに苦労をした、この年をとった牛に分かれるのを、格別悲しいとも感じなかったのであるが、牛は、さもこの家から離れてゆくのが悲しそうに見えて、なんとなく、歩く足つきも鈍かったのでありました。
 """
-    short_body = """ \
+    short_body = """\
 　あるところに、牛を持っている百姓がありました。その牛は、もう年をとっていました。長い年の間、その百姓のために重い荷をつけて働いたのであります。そして、いまでも、なお働いていたのであったけれど、なんにしても、
 """
-    http_body = """ \
+    http_body = """\
 　あるところに、牛を持っている百姓がありました。その牛は、もう年をとっていました。長い年の間、その百姓のために重い荷をつけて働いたのであります。そして、いまでも、なお働いていたのであった。
 http://www.chikuwachan.com/live/catalog/index.cgi?category=&sort=room2&rev=co10000
+"""
+    http_nico_url = """\
+sm123 lv123
 """
     # target_body = original_body
     target_body = test_body
     # target_body = short_body
     # target_body = http_body
+    # target_body = http_nico_url
 
     # need to convert body from str type to unicode type
     target_body = target_body.decode('UTF-8')
