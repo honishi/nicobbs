@@ -52,6 +52,10 @@ def create_twitter_statuses(header, continued_mark, body, continue_mark):
     available_length = TWITTER_STATUS_MAX_LENGTH - len(header + continued_mark + continue_mark)
     # print available_length
 
+    # print 'before replace \\n$: [' + body + ']'
+    body = re.sub(r'\n+$', '', body)
+    # print 'after replace \\n$: [' + body + ']'
+
     statuses_with_body = []
     status_buffer = u""
     chunk_type = CHUNK_TYPE_UNKNOWN
@@ -125,9 +129,14 @@ if __name__ == "__main__":
     short_body = """ \
 　あるところに、牛を持っている百姓がありました。その牛は、もう年をとっていました。長い年の間、その百姓のために重い荷をつけて働いたのであります。そして、いまでも、なお働いていたのであったけれど、なんにしても、
 """
+    http_body = """ \
+　あるところに、牛を持っている百姓がありました。その牛は、もう年をとっていました。長い年の間、その百姓のために重い荷をつけて働いたのであります。そして、いまでも、なお働いていたのであった。
+http://www.chikuwachan.com/live/catalog/index.cgi?category=&sort=room2&rev=co10000
+"""
     # target_body = original_body
     target_body = test_body
     # target_body = short_body
+    # target_body = http_body
 
     # need to convert body from str type to unicode type
     target_body = target_body.decode('UTF-8')

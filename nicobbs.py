@@ -221,6 +221,7 @@ class NicoBBS(object):
         message = re.sub("<.*?>", "", message)
         message = re.sub("&gt;", ">", message)
         message = re.sub("&lt;", "<", message)
+        message = re.sub("&amp;", "&", message)
 
         return message
 
