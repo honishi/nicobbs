@@ -8,8 +8,10 @@ TCO_URL_LENGTH = 23
 
 REGEXP_VIDEO = r'sm\d{3,}'
 REGEXP_LIVE = r'lv\d{3,}'
+REGEXP_COMMUNITY = r'co\d{2,}'
 BASE_URL_VIDEO = u'http://www.nicovideo.jp/watch/'
 BASE_URL_LIVE = u'http://live.nicovideo.jp/watch/'
+BASE_URL_COMMUNITY = u'http://com.nicovideo.jp/community/'
 
 # regexp for http(s), http://www.megasoft.co.jp/mifes/seiki/s310.html
 # regexp for twitter account, http://stackoverflow.com/a/4424288
@@ -60,6 +62,7 @@ def create_twitter_statuses(header, continued_mark, body, continue_mark):
     # print 'before replace: [' + body + ']'
     body = re.sub(r'(' + REGEXP_VIDEO + r')', BASE_URL_VIDEO + r'\1', body)
     body = re.sub(r'(' + REGEXP_LIVE + r')', BASE_URL_LIVE + r'\1', body)
+    body = re.sub(r'(' + REGEXP_COMMUNITY + r')', BASE_URL_COMMUNITY + r'\1', body)
     body = re.sub(r'\n+$', '', body)
     # print 'after replace: [' + body + ']'
 
@@ -141,7 +144,7 @@ if __name__ == "__main__":
 http://www.chikuwachan.com/live/catalog/index.cgi?category=&sort=room2&rev=co10000
 """
     http_nico_url = """\
-sm123 lv123
+sm123 lv123 co123
 """
     # target_body = original_body
     target_body = test_body
