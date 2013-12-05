@@ -53,6 +53,18 @@ def create_finalized_statuses(status_bodies, header, continued_mark, continue_ma
 
     return finalized_statuses
 
+def replace_body(body):
+    body = re.sub(r'>>' + REGEXP_VIDEO + r'\n', r'', body)
+    body = re.sub(r'>>' + REGEXP_LIVE + r'\n', r'', body)
+    body = re.sub(r'>>' + REGEXP_COMMUNITY + r'\n', r'', body)
+
+    body = re.sub(r'(' + REGEXP_VIDEO + r')', BASE_URL_VIDEO + r'\1', body)
+    body = re.sub(r'(' + REGEXP_LIVE + r')', BASE_URL_LIVE + r'\1', body)
+    body = re.sub(r'(' + REGEXP_COMMUNITY + r')', BASE_URL_COMMUNITY + r'\1', body)
+
+    body = re.sub(r'\n+$', '', body)
+
+    return body
 
 # public methods
 def create_twitter_statuses(header, continued_mark, body, continue_mark):
@@ -60,10 +72,7 @@ def create_twitter_statuses(header, continued_mark, body, continue_mark):
     # print available_length
 
     # print 'before replace: [' + body + ']'
-    body = re.sub(r'(' + REGEXP_VIDEO + r')', BASE_URL_VIDEO + r'\1', body)
-    body = re.sub(r'(' + REGEXP_LIVE + r')', BASE_URL_LIVE + r'\1', body)
-    body = re.sub(r'(' + REGEXP_COMMUNITY + r')', BASE_URL_COMMUNITY + r'\1', body)
-    body = re.sub(r'\n+$', '', body)
+    body = replace_body(body)
     # print 'after replace: [' + body + ']'
 
     statuses_with_body = []
@@ -144,7 +153,14 @@ if __name__ == "__main__":
 http://www.chikuwachan.com/live/catalog/index.cgi?category=&sort=room2&rev=co10000
 """
     http_nico_url = """\
-sm123 lv123 co123
+abc
+>>sm123
+sm123
+>>lv123
+lv123
+>>co123
+co123
+abc
 """
     # target_body = original_body
     target_body = test_body
