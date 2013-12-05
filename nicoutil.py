@@ -54,13 +54,12 @@ def create_finalized_statuses(status_bodies, header, continued_mark, continue_ma
     return finalized_statuses
 
 def replace_body(body):
-    body = re.sub(r'>>' + REGEXP_VIDEO + r'\n', r'', body)
-    body = re.sub(r'>>' + REGEXP_LIVE + r'\n', r'', body)
-    body = re.sub(r'>>' + REGEXP_COMMUNITY + r'\n', r'', body)
-
-    body = re.sub(r'(' + REGEXP_VIDEO + r')', BASE_URL_VIDEO + r'\1', body)
-    body = re.sub(r'(' + REGEXP_LIVE + r')', BASE_URL_LIVE + r'\1', body)
-    body = re.sub(r'(' + REGEXP_COMMUNITY + r')', BASE_URL_COMMUNITY + r'\1', body)
+    body = re.sub(r'>>(' + REGEXP_VIDEO + r')\n' + REGEXP_VIDEO,
+                  BASE_URL_VIDEO + r'\1', body)
+    body = re.sub(r'>>(' + REGEXP_LIVE + r')\n' + REGEXP_LIVE,
+                  BASE_URL_LIVE + r'\1', body)
+    body = re.sub(r'>>(' + REGEXP_COMMUNITY + r')\n' + REGEXP_COMMUNITY,
+                  BASE_URL_COMMUNITY + r'\1', body)
 
     body = re.sub(r'\n+$', '', body)
 
