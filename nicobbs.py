@@ -19,6 +19,7 @@ import tweepy
 
 LOGIN_URL = 'https://secure.nicovideo.jp/secure/login'
 COMMUNITY_TOP_URL = 'http://com.nicovideo.jp/community/'
+COMMUNITY_VIDEO_URL = 'http://com.nicovideo.jp/video/'
 COMMUNITY_BBS_URL = 'http://com.nicovideo.jp/bbs/'
 RESPONSE_URL = 'http://dic.nicovideo.jp/b/c/'
 DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
@@ -231,14 +232,14 @@ class NicoBBS(object):
         return message
 
 # scraping utility
-    def read_community_top_page(self, opener, community):
-        url = COMMUNITY_TOP_URL + community
-        self.logger.debug("reading top page, target: " + url)
+    def read_community_page(self, opener, base_url, community):
+        url = base_url + community
+        self.logger.debug("reading community page, target: " + url)
 
         reader = opener.open(url)
         rawhtml = reader.read()
         # self.logger.debug(rawhtml)
-        self.logger.debug("finished to read top page.")
+        self.logger.debug("finished to read community page.")
 
         return rawhtml
 
@@ -303,6 +304,26 @@ class NicoBBS(object):
 
         return news_items
 
+# video
+    def get_community_video(self, rawhtml, community):
+        videos = []
+        soup = BeautifulSoup(rawhtml)
+        video_tag = soup.find(id="video")
+
+        if video_tag:
+            items = video_tag.select(".video")
+            for item in items:
+                title = item.get_text()
+                link = item["href"]
+
+                video = {"community": community,
+                         "title": title,
+                         "link": link,
+                         "status": STATUS_UNPROCESSED}
+                videos.append(video)
+
+        return videos
+
 # mongo
     # response
     def register_response(self, response):
@@ -361,6 +382,25 @@ class NicoBBS(object):
     def update_news_status(self, news, status):
         self.database.news.update(
             {"community": news["community"], "date": news["date"]},
+            {"$set": {"status": status}})
+
+    # video
+    def register_video(self, video):
+        self.database.video.update(
+            {"community": video["community"], "link": video["link"]}, video, True)
+
+    def is_video_registered(self, video):
+        count = self.database.video.find(
+            {"community": video["community"], "link": video["link"]}).count()
+        return True if 0 < count else False
+
+    def get_video_with_community_and_status(self, community, status):
+        videos = self.database.video.find({"community": community, "status": status})
+        return videos
+
+    def update_video_status(self, video, status):
+        self.database.video.update(
+            {"community": video["community"], "link": video["link"]},
             {"$set": {"status": status}})
 
 # filter
@@ -549,6 +589,58 @@ class NicoBBS(object):
 
         self.logger.debug("completed to process news")
 
+    # video
+    def crawl_video(self, rawhtml, community):
+        self.logger.debug("*** crawling video, community: %s" % community)
+        videos = self.get_community_video(rawhtml, community)
+        self.logger.debug("scraped %s videos" % len(videos))
+
+        for video in videos:
+            if self.is_video_registered(video):
+                self.logger.debug("skipped: %s" % video["link"])
+            else:
+                self.register_video(video)
+                self.logger.debug("registered: %s" % video["link"])
+
+        self.logger.debug("completed to crawl video")
+
+    def tweet_video(self, community):
+        unprocessed_videos = self.get_video_with_community_and_status(
+            community, STATUS_UNPROCESSED)
+        tweet_count = 0
+
+        self.logger.debug("*** processing video, community: %s unprocessed: %d" %
+                          (community, unprocessed_videos.count()))
+
+        for video in unprocessed_videos:
+            self.logger.debug("processing video %s" % video["link"])
+
+            statuses = nicoutil.create_twitter_statuses(
+                u"[コミュニティ動画投稿]\n",
+                u'[続き]\n',
+                u"動画「%s」が投稿されました。\n%s" % (video["title"], video["link"]),
+                u'\n[続く]')
+
+            for status in statuses:
+                if 0 < tweet_count:
+                    self.logger.debug("sleeping %d secs before next tweet..." % TWEET_INTERVAL)
+                    time.sleep(TWEET_INTERVAL)
+                try:
+                    self.update_twitter_status(community, status)
+                except TwitterDuplicateStatusUpdateError, error:
+                    self.logger.debug("twitter status update error, duplicate: %s" % error)
+                    self.update_video_status(video, STATUS_DUPLICATE)
+                    break
+                except TwitterStatusUpdateError, error:
+                    self.logger.debug("twitter status update error, unknown: %s" % error)
+                    break
+                else:
+                    self.update_video_status(video, STATUS_COMPLETED)
+                    self.logger.debug("status updated: [%s]" % status)
+                tweet_count += 1
+
+        self.logger.debug("completed to process video")
+
 # main
     def start(self):
         # inifinite loop
@@ -562,11 +654,15 @@ class NicoBBS(object):
                         self.crawl_bbs_response(opener, community)
                         self.tweet_bbs_response(community)
 
-                        rawhtml = self.read_community_top_page(opener, community)
+                        rawhtml = self.read_community_page(opener, COMMUNITY_TOP_URL, community)
                         self.crawl_reserved_live(rawhtml, community)
                         self.tweet_reserved_live(community)
                         self.crawl_news(rawhtml, community)
                         self.tweet_news(community)
+
+                        rawhtml = self.read_community_page(opener, COMMUNITY_VIDEO_URL, community)
+                        self.crawl_video(rawhtml, community)
+                        self.tweet_video(community)
                     except Exception, error:
                         self.logger.debug("*** caught error: %s" % error)
             except Exception, error:

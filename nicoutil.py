@@ -58,6 +58,7 @@ def create_finalized_statuses(status_bodies, header, continued_mark, continue_ma
 
     return finalized_statuses
 
+
 def replace_body(body):
     body = re.sub(r'>>(' + REGEXP_VIDEO + r')\n' + REGEXP_VIDEO,
                   BASE_URL_VIDEO + r'\1', body)
@@ -69,6 +70,7 @@ def replace_body(body):
     body = re.sub(r'\n+$', '', body)
 
     return body
+
 
 # public methods
 def create_twitter_statuses(header, continued_mark, body, continue_mark):

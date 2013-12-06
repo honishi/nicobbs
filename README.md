@@ -33,13 +33,15 @@ show dbs
 use dev-nicobbs-v2
 show collections
 
-// we store data into the collections that are named 'response', 'live' and 'news'
+// we store scraped contents into the following collections that are named 'response', 'live', 'news' and 'video'
 db.response.find()
 db.response.getIndexes()
 db.live.find()
 db.live.getIndexes()
 db.news.find()
 db.news.getIndexes()
+db.video.find()
+db.video.getIndexes()
 ````
 
 (required) create indexes.
@@ -52,6 +54,9 @@ db.live.ensureIndex({community:1, status:1})
 
 db.news.ensureIndex({community:1, date:1})
 db.news.ensureIndex({community:1, status:1})
+
+db.video.ensureIndex({community:1, link:1})
+db.video.ensureIndex({community:1, status:1})
 ````
 
 kick
@@ -76,6 +81,7 @@ copy collection to another database.
 ````
 use dev-nicobbs-v2
 db.news.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['news'].insert(d); });
+db.video.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['video'].insert(d); });
 ````
 - http://stackoverflow.com/a/11554924
 
