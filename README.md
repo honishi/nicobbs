@@ -33,23 +33,25 @@ show dbs
 use dev-nicobbs-v2
 show collections
 
-// we use two collections that are named 'response' and 'live'
+// we store data into the collections that are named 'response', 'live' and 'news'
 db.response.find()
 db.response.getIndexes()
 db.live.find()
 db.live.getIndexes()
+db.news.find()
+db.news.getIndexes()
 ````
 
-(required) create index for 'response' collection.
+(required) create indexes.
 ````
 db.response.ensureIndex({community:1, number:1})
 db.response.ensureIndex({community:1, status:1})
-````
 
-(required) create index for 'live' collection.
-````
 db.live.ensureIndex({community:1, link:1})
 db.live.ensureIndex({community:1, status:1})
+
+db.news.ensureIndex({community:1, date:1})
+db.news.ensureIndex({community:1, status:1})
 ````
 
 kick
@@ -67,6 +69,15 @@ monitoring example using crontab
 --
 	# monitoring nicoalert
 	* * * * * /path/to/nicobbs/nicobbs.sh monitor >> /path/to/nicobbs/log/monitor.log 2>&1
+
+snippets for me
+--
+copy collection to another database.
+````
+use dev-nicobbs-v2
+db.news.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['news'].insert(d); });
+````
+- http://stackoverflow.com/a/11554924
 
 license
 --

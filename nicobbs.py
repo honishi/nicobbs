@@ -230,20 +230,28 @@ class NicoBBS(object):
                          u"(省略)", message)
         return message
 
-# reserved live
-    def get_community_reserved_live(self, opener, community):
+# scraping utility
+    def read_community_top_page(self, opener, community):
         url = COMMUNITY_TOP_URL + community
-        self.logger.debug("scraping target: " + url)
+        self.logger.debug("reading top page, target: " + url)
+
         reader = opener.open(url)
         rawhtml = reader.read()
-        self.logger.debug("finished to get raw community top page.")
+        self.logger.debug("finished to read top page.")
 
+        return rawhtml
+
+    def find_community_name(self, soup):
+        return soup.find("h1", {"id": "community_name"}).text
+
+# reserved live
+    def get_community_reserved_live(self, opener, community):
+        rawhtml = self.read_community_top_page(opener, community)
         # self.logger.debug(rawhtml)
-        # sys.exit()
 
         reserved_lives = []
         soup = BeautifulSoup(rawhtml)
-        community_name = soup.find("h1", {"id": "community_name"}).text
+        community_name = self.find_community_name(soup)
         lives = soup.findAll("div", {"class": "item"})
 
         for live in lives:
@@ -263,6 +271,42 @@ class NicoBBS(object):
                     reserved_lives.append(reserved_live)
 
         return reserved_lives
+
+# news
+    def get_community_news(self, opener, community):
+        rawhtml = self.read_community_top_page(opener, community)
+        # self.logger.debug(rawhtml)
+
+        news_items = []
+        soup = BeautifulSoup(rawhtml)
+        community_name = self.find_community_name(soup)
+
+        community_news_tag = soup.find(id="community_news")
+        if community_news_tag:
+            items = community_news_tag.select(".item")
+            for item in items:
+                title = item.select(".title")[0].get_text()
+                desc = item.select(".desc")[0].get_text()
+                desc = self.prefilter_message(desc)
+
+                date_and_name = item.select(".date")[0].get_text()
+                date = None
+                name = None
+                matched = re.match(ur'(.+)（(.+)）', date_and_name)
+                if matched:
+                    date = matched.group(1)
+                    name = matched.group(2)
+
+                news_item = {"community": community,
+                             "community_name": community_name,
+                             "title": title,
+                             "desc": desc,
+                             "date": date,
+                             "name": name,
+                             "status": STATUS_UNPROCESSED}
+                news_items.append(news_item)
+
+        return news_items
 
 # mongo
     # response
@@ -305,6 +349,25 @@ class NicoBBS(object):
             {"community": live["community"], "link": live["link"]},
             {"$set": {"status": status}})
 
+    # news
+    def register_news(self, news):
+        self.database.news.update(
+            {"community": news["community"], "date": news["date"]}, news, True)
+
+    def is_news_registered(self, news):
+        count = self.database.news.find(
+            {"community": news["community"], "date": news["date"]}).count()
+        return True if 0 < count else False
+
+    def get_news_with_community_and_status(self, community, status):
+        news = self.database.news.find({"community": community, "status": status})
+        return news
+
+    def update_news_status(self, news, status):
+        self.database.news.update(
+            {"community": news["community"], "date": news["date"]},
+            {"$set": {"status": status}})
+
 # filter
     def contains_ng_words(self, message):
         for word in self.ng_words:
@@ -325,6 +388,7 @@ class NicoBBS(object):
     #     intnum = int(strnum)
     #     return str(intnum - ((intnum-1) % 30))
 
+    # bbs
     def crawl_bbs_response(self, opener, community):
         self.logger.debug("*** crawling responses, community: %s" % community)
 
@@ -371,7 +435,7 @@ class NicoBBS(object):
             # create statuses
             response_body = self.postfilter_message(response_body)
             statuses = nicoutil.create_twitter_statuses(
-                u'(' + response_name + u')\n', u'[続き] ', response_body, u' [続く]')
+                u'(' + response_name + u')\n', u'[続き]\n', response_body, u'\n[続く]')
 
             for status in statuses:
                 if 0 < tweet_count:
@@ -393,14 +457,16 @@ class NicoBBS(object):
                 else:
                     self.update_response_status(response, STATUS_COMPLETED)
                     self.logger.debug("status updated: [%s]" % status)
-                    tweet_count += 1
+                tweet_count += 1
 
         self.logger.debug("completed to process responses")
 
+    # reserved live
     def crawl_reserved_live(self, opener, community):
         self.logger.debug("*** crawling new reserved lives, community: %s" % community)
         reserved_lives = self.get_community_reserved_live(opener, community)
         self.logger.debug("scraped %s reserved lives" % len(reserved_lives))
+
         for reserved_live in reserved_lives:
             if self.is_live_registered(reserved_live):
                 self.logger.debug("skipped: %s" % reserved_live["link"])
@@ -429,8 +495,6 @@ class NicoBBS(object):
                 self.update_live_status(live, STATUS_DUPLICATE)
                 break
             except TwitterStatusUpdateError, error:
-                # twitter error case including api limit
-                # response status should not be changed here for future retrying
                 self.logger.debug("twitter status update error, unknown")
                 break
             else:
@@ -439,6 +503,58 @@ class NicoBBS(object):
 
         self.logger.debug("completed to process reserved lives")
 
+    # news
+    def crawl_news(self, opener, community):
+        self.logger.debug("*** crawling news, community: %s" % community)
+        news_items = self.get_community_news(opener, community)
+        self.logger.debug("scraped %s news" % len(news_items))
+
+        for news_item in news_items:
+            if self.is_news_registered(news_item):
+                self.logger.debug("skipped: %s" % news_item["date"])
+            else:
+                self.register_news(news_item)
+                self.logger.debug("registered: %s" % news_item["date"])
+
+        self.logger.debug("completed to crawl news")
+
+    def tweet_news(self, community):
+        unprocessed_news = self.get_news_with_community_and_status(
+            community, STATUS_UNPROCESSED)
+        tweet_count = 0
+
+        self.logger.debug("*** processing news, community: %s unprocessed: %d" %
+                          (community, unprocessed_news.count()))
+
+        for news in unprocessed_news:
+            self.logger.debug("processing news %s" % news["date"])
+
+            statuses = nicoutil.create_twitter_statuses(
+                u"[お知らせ更新]\n" +
+                u"「%s」(%s)\n\n" % (news["title"], news["name"]),
+                u'[続き]\n', news["desc"], u'\n[続く]')
+
+            for status in statuses:
+                if 0 < tweet_count:
+                    self.logger.debug("sleeping %d secs before next tweet..." % TWEET_INTERVAL)
+                    time.sleep(TWEET_INTERVAL)
+                try:
+                    self.update_twitter_status(community, status)
+                except TwitterDuplicateStatusUpdateError, error:
+                    self.logger.debug("twitter status update error, duplicate: %s" % error)
+                    self.update_news_status(news, STATUS_DUPLICATE)
+                    break
+                except TwitterStatusUpdateError, error:
+                    self.logger.debug("twitter status update error, unknown: %s" % error)
+                    break
+                else:
+                    self.update_news_status(news, STATUS_COMPLETED)
+                    self.logger.debug("status updated: [%s]" % status)
+                tweet_count += 1
+
+        self.logger.debug("completed to process news")
+
+# main
     def start(self):
         # inifinite loop
         while True:
@@ -450,8 +566,12 @@ class NicoBBS(object):
                     try:
                         self.crawl_bbs_response(opener, community)
                         self.tweet_bbs_response(community)
+
                         self.crawl_reserved_live(opener, community)
                         self.tweet_reserved_live(community)
+
+                        self.crawl_news(opener, community)
+                        self.tweet_news(community)
                     except Exception, error:
                         self.logger.debug("*** caught error: %s" % error)
             except Exception, error:
