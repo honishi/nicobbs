@@ -237,6 +237,7 @@ class NicoBBS(object):
 
         reader = opener.open(url)
         rawhtml = reader.read()
+        # self.logger.debug(rawhtml)
         self.logger.debug("finished to read top page.")
 
         return rawhtml
@@ -245,10 +246,7 @@ class NicoBBS(object):
         return soup.find("h1", {"id": "community_name"}).text
 
 # reserved live
-    def get_community_reserved_live(self, opener, community):
-        rawhtml = self.read_community_top_page(opener, community)
-        # self.logger.debug(rawhtml)
-
+    def get_community_reserved_live(self, rawhtml, community):
         reserved_lives = []
         soup = BeautifulSoup(rawhtml)
         community_name = self.find_community_name(soup)
@@ -273,10 +271,7 @@ class NicoBBS(object):
         return reserved_lives
 
 # news
-    def get_community_news(self, opener, community):
-        rawhtml = self.read_community_top_page(opener, community)
-        # self.logger.debug(rawhtml)
-
+    def get_community_news(self, rawhtml, community):
         news_items = []
         soup = BeautifulSoup(rawhtml)
         community_name = self.find_community_name(soup)
@@ -462,9 +457,9 @@ class NicoBBS(object):
         self.logger.debug("completed to process responses")
 
     # reserved live
-    def crawl_reserved_live(self, opener, community):
+    def crawl_reserved_live(self, rawhtml, community):
         self.logger.debug("*** crawling new reserved lives, community: %s" % community)
-        reserved_lives = self.get_community_reserved_live(opener, community)
+        reserved_lives = self.get_community_reserved_live(rawhtml, community)
         self.logger.debug("scraped %s reserved lives" % len(reserved_lives))
 
         for reserved_live in reserved_lives:
@@ -504,9 +499,9 @@ class NicoBBS(object):
         self.logger.debug("completed to process reserved lives")
 
     # news
-    def crawl_news(self, opener, community):
+    def crawl_news(self, rawhtml, community):
         self.logger.debug("*** crawling news, community: %s" % community)
-        news_items = self.get_community_news(opener, community)
+        news_items = self.get_community_news(rawhtml, community)
         self.logger.debug("scraped %s news" % len(news_items))
 
         for news_item in news_items:
@@ -567,10 +562,10 @@ class NicoBBS(object):
                         self.crawl_bbs_response(opener, community)
                         self.tweet_bbs_response(community)
 
-                        self.crawl_reserved_live(opener, community)
+                        rawhtml = self.read_community_top_page(opener, community)
+                        self.crawl_reserved_live(rawhtml, community)
                         self.tweet_reserved_live(community)
-
-                        self.crawl_news(opener, community)
+                        self.crawl_news(rawhtml, community)
                         self.tweet_news(community)
                     except Exception, error:
                         self.logger.debug("*** caught error: %s" % error)
