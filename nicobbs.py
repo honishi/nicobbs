@@ -123,7 +123,7 @@ class NicoBBS(object):
         try:
             tweepy.API(auth).update_status(status)
         except tweepy.error.TweepError, error:
-            self.logger.debug("twitter update error: %s" % error)
+            self.logger.error("twitter update error: %s" % error)
             # error.reason is the list object like following:
             #   [{"message":"Sorry, that page does not exist","code":34}]
             # see the following references for details:
@@ -152,7 +152,7 @@ class NicoBBS(object):
         # login
         opener.open(
             LOGIN_URL, "mail=%s&password=%s" % (self.mail, self.password))
-        self.logger.debug("finished login")
+        self.logger.info("finished login")
 
         return opener
 
@@ -234,12 +234,12 @@ class NicoBBS(object):
 # scraping utility
     def read_community_page(self, opener, base_url, community):
         url = base_url + community
-        self.logger.debug("*** reading community page, target: " + url)
+        self.logger.info("*** reading community page, target: " + url)
 
         reader = opener.open(url)
         rawhtml = reader.read()
         # self.logger.debug(rawhtml)
-        self.logger.debug("finished to read community page.")
+        self.logger.info("finished to read community page.")
 
         return rawhtml
 
@@ -425,7 +425,7 @@ class NicoBBS(object):
 
     # bbs
     def crawl_bbs_response(self, opener, community):
-        self.logger.debug("*** crawling responses, community: %s" % community)
+        self.logger.info("*** crawling responses, community: %s" % community)
 
         internal_url = self.get_bbs_internal_url(opener, community)
         responses = self.get_bbs_responses(opener, internal_url, community)
@@ -444,15 +444,15 @@ class NicoBBS(object):
 
         self.logger.debug("skipped: %s" % skipped_responses)
         self.logger.debug("registered: %s" % registered_responses)
-        self.logger.debug("completed to crawl responses")
+        self.logger.info("completed to crawl responses")
 
     def tweet_bbs_response(self, community):
         unprocessed_responses = self.get_responses_with_community_and_status(
             community, STATUS_UNPROCESSED)
         tweet_count = 0
 
-        self.logger.debug("*** processing responses, community: %s unprocessed: %d" %
-                          (community, unprocessed_responses.count()))
+        self.logger.info("*** processing responses, community: %s unprocessed: %d" %
+                         (community, unprocessed_responses.count()))
 
         for response in unprocessed_responses:
             self.logger.debug("processing response #%s" % response["number"])
@@ -481,24 +481,24 @@ class NicoBBS(object):
                 except TwitterDuplicateStatusUpdateError, error:
                     # status is already posted to twitter. so response status should be
                     # changed from 'unprocessed' to other, in order to avoid reprocessing
-                    self.logger.debug("twitter status update error, duplicate: %s" % error)
+                    self.logger.error("twitter status update error, duplicate: %s" % error)
                     self.update_response_status(response, STATUS_DUPLICATE)
                     break
                 except TwitterStatusUpdateError, error:
                     # twitter error case including api limit
                     # response status should not be changed here for future retrying
-                    self.logger.debug("twitter status update error, unknown: %s" % error)
+                    self.logger.error("twitter status update error, unknown: %s" % error)
                     break
                 else:
                     self.update_response_status(response, STATUS_COMPLETED)
-                    self.logger.debug("status updated: [%s]" % status)
+                    self.logger.info("status updated: [%s]" % status)
                 tweet_count += 1
 
-        self.logger.debug("completed to process responses")
+        self.logger.info("completed to process responses")
 
     # reserved live
     def crawl_reserved_live(self, rawhtml, community):
-        self.logger.debug("*** crawling new reserved lives, community: %s" % community)
+        self.logger.info("*** crawling new reserved lives, community: %s" % community)
         reserved_lives = self.get_community_reserved_live(rawhtml, community)
         self.logger.debug("scraped %s reserved lives" % len(reserved_lives))
 
@@ -509,14 +509,14 @@ class NicoBBS(object):
                 self.register_live(reserved_live)
                 self.logger.debug("registered: %s" % reserved_live["link"])
 
-        self.logger.debug("completed to crawl reserved lives")
+        self.logger.info("completed to crawl reserved lives")
 
     def tweet_reserved_live(self, community):
         unprocessed_lives = self.get_lives_with_community_and_status(
             community, STATUS_UNPROCESSED)
 
-        self.logger.debug("*** processing lives, community: %s unprocessed: %d" %
-                          (community, unprocessed_lives.count()))
+        self.logger.info("*** processing lives, community: %s unprocessed: %d" %
+                         (community, unprocessed_lives.count()))
 
         for live in unprocessed_lives:
             self.logger.debug("processing live %s" % live["link"])
@@ -526,21 +526,21 @@ class NicoBBS(object):
             try:
                 self.update_twitter_status(community, message)
             except TwitterDuplicateStatusUpdateError, error:
-                self.logger.debug("twitter status update error, duplicate: %s", error)
+                self.logger.error("twitter status update error, duplicate: %s", error)
                 self.update_live_status(live, STATUS_DUPLICATE)
                 break
             except TwitterStatusUpdateError, error:
-                self.logger.debug("twitter status update error, unknown")
+                self.logger.error("twitter status update error, unknown")
                 break
             else:
                 self.update_live_status(live, STATUS_COMPLETED)
-                self.logger.debug("status updated: [%s]" % message)
+                self.logger.info("status updated: [%s]" % message)
 
-        self.logger.debug("completed to process reserved lives")
+        self.logger.info("completed to process reserved lives")
 
     # news
     def crawl_news(self, rawhtml, community):
-        self.logger.debug("*** crawling news, community: %s" % community)
+        self.logger.info("*** crawling news, community: %s" % community)
         news_items = self.get_community_news(rawhtml, community)
         self.logger.debug("scraped %s news" % len(news_items))
 
@@ -551,15 +551,15 @@ class NicoBBS(object):
                 self.register_news(news_item)
                 self.logger.debug("registered: %s" % news_item["date"])
 
-        self.logger.debug("completed to crawl news")
+        self.logger.info("completed to crawl news")
 
     def tweet_news(self, community):
         unprocessed_news = self.get_news_with_community_and_status(
             community, STATUS_UNPROCESSED)
         tweet_count = 0
 
-        self.logger.debug("*** processing news, community: %s unprocessed: %d" %
-                          (community, unprocessed_news.count()))
+        self.logger.info("*** processing news, community: %s unprocessed: %d" %
+                         (community, unprocessed_news.count()))
 
         for news in unprocessed_news:
             self.logger.debug("processing news %s" % news["date"])
@@ -576,22 +576,22 @@ class NicoBBS(object):
                 try:
                     self.update_twitter_status(community, status)
                 except TwitterDuplicateStatusUpdateError, error:
-                    self.logger.debug("twitter status update error, duplicate: %s" % error)
+                    self.logger.error("twitter status update error, duplicate: %s" % error)
                     self.update_news_status(news, STATUS_DUPLICATE)
                     break
                 except TwitterStatusUpdateError, error:
-                    self.logger.debug("twitter status update error, unknown: %s" % error)
+                    self.logger.error("twitter status update error, unknown: %s" % error)
                     break
                 else:
                     self.update_news_status(news, STATUS_COMPLETED)
-                    self.logger.debug("status updated: [%s]" % status)
+                    self.logger.info("status updated: [%s]" % status)
                 tweet_count += 1
 
-        self.logger.debug("completed to process news")
+        self.logger.info("completed to process news")
 
     # video
     def crawl_video(self, rawhtml, community):
-        self.logger.debug("*** crawling video, community: %s" % community)
+        self.logger.info("*** crawling video, community: %s" % community)
         videos = self.get_community_video(rawhtml, community)
         self.logger.debug("scraped %s videos" % len(videos))
 
@@ -602,15 +602,15 @@ class NicoBBS(object):
                 self.register_video(video)
                 self.logger.debug("registered: %s" % video["link"])
 
-        self.logger.debug("completed to crawl video")
+        self.logger.info("completed to crawl video")
 
     def tweet_video(self, community):
         unprocessed_videos = self.get_video_with_community_and_status(
             community, STATUS_UNPROCESSED)
         tweet_count = 0
 
-        self.logger.debug("*** processing video, community: %s unprocessed: %d" %
-                          (community, unprocessed_videos.count()))
+        self.logger.info("*** processing video, community: %s unprocessed: %d" %
+                         (community, unprocessed_videos.count()))
 
         for video in unprocessed_videos:
             self.logger.debug("processing video %s" % video["link"])
@@ -628,18 +628,18 @@ class NicoBBS(object):
                 try:
                     self.update_twitter_status(community, status)
                 except TwitterDuplicateStatusUpdateError, error:
-                    self.logger.debug("twitter status update error, duplicate: %s" % error)
+                    self.logger.error("twitter status update error, duplicate: %s" % error)
                     self.update_video_status(video, STATUS_DUPLICATE)
                     break
                 except TwitterStatusUpdateError, error:
-                    self.logger.debug("twitter status update error, unknown: %s" % error)
+                    self.logger.error("twitter status update error, unknown: %s" % error)
                     break
                 else:
                     self.update_video_status(video, STATUS_COMPLETED)
-                    self.logger.debug("status updated: [%s]" % status)
+                    self.logger.info("status updated: [%s]" % status)
                 tweet_count += 1
 
-        self.logger.debug("completed to process video")
+        self.logger.info("completed to process video")
 
 # main
     def start(self):
@@ -649,7 +649,7 @@ class NicoBBS(object):
                 self.logger.debug(LOG_SEPARATOR)
                 opener = self.create_opener()
             except Exception, error:
-                self.logger.debug("*** caught error when creating opener, error : %s" % error)
+                self.logger.error("*** caught error when creating opener, error : %s" % error)
             else:
                 for community in self.target_communities:
                     self.logger.debug(LOG_SEPARATOR)
@@ -657,10 +657,10 @@ class NicoBBS(object):
                         self.crawl_bbs_response(opener, community)
                         self.tweet_bbs_response(community)
                     except Exception, error:
-                        self.logger.debug(
+                        self.logger.error(
                             "*** caught error when processing bbs, error: %s" % error)
                         if isinstance(error, urllib2.HTTPError) and error.code == 403:
-                            self.logger.debug("bbs is closed?")
+                            self.logger.info("bbs is closed?")
 
                     try:
                         rawhtml = self.read_community_page(opener, COMMUNITY_TOP_URL, community)
@@ -673,7 +673,7 @@ class NicoBBS(object):
                         self.crawl_video(rawhtml, community)
                         self.tweet_video(community)
                     except Exception, error:
-                        self.logger.debug(
+                        self.logger.error(
                             "*** caught error when processing live/video, error: %s" % error)
 
             self.logger.debug(LOG_SEPARATOR)
