@@ -234,7 +234,7 @@ class NicoBBS(object):
 # scraping utility
     def read_community_page(self, opener, base_url, community):
         url = base_url + community
-        self.logger.debug("reading community page, target: " + url)
+        self.logger.debug("*** reading community page, target: " + url)
 
         reader = opener.open(url)
         rawhtml = reader.read()
@@ -648,12 +648,21 @@ class NicoBBS(object):
             try:
                 self.logger.debug(LOG_SEPARATOR)
                 opener = self.create_opener()
+            except Exception, error:
+                self.logger.debug("*** caught error when creating opener, error : %s" % error)
+            else:
                 for community in self.target_communities:
                     self.logger.debug(LOG_SEPARATOR)
                     try:
                         self.crawl_bbs_response(opener, community)
                         self.tweet_bbs_response(community)
+                    except Exception, error:
+                        self.logger.debug(
+                            "*** caught error when processing bbs, error: %s" % error)
+                        if isinstance(error, urllib2.HTTPError) and error.code == 403:
+                            self.logger.debug("bbs is closed?")
 
+                    try:
                         rawhtml = self.read_community_page(opener, COMMUNITY_TOP_URL, community)
                         self.crawl_reserved_live(rawhtml, community)
                         self.tweet_reserved_live(community)
@@ -664,9 +673,8 @@ class NicoBBS(object):
                         self.crawl_video(rawhtml, community)
                         self.tweet_video(community)
                     except Exception, error:
-                        self.logger.debug("*** caught error: %s" % error)
-            except Exception, error:
-                self.logger.debug("*** caught error: %s" % error)
+                        self.logger.debug(
+                            "*** caught error when processing live/video, error: %s" % error)
 
             self.logger.debug(LOG_SEPARATOR)
             self.logger.debug("*** sleeping %d secs..." % CRAWL_INTERVAL)
