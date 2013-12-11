@@ -1,39 +1,49 @@
 #!/usr/bin/env bash
 
+set -e
+
 basedir=$(cd $(dirname $0);pwd)
 pyenv=${basedir}/venv/bin/activate
 program=${basedir}/nicobbs.py
 logfile=${basedir}/log/nicobbs.log
 nohupfile=${basedir}/log/nohup.out
-kill_python="python ${program}"
-monitor_threshold=$((2*60))
-dbname=$(grep database_name ${basedir}/nicobbs.config | cut -d'=' -f2 | tr -d ' ')
+pgrep_target="python ${program}"
+monitor_threshold=$((1*60))
 customenv=${basedir}/nicobbs.env
 
 start() {
-  nohup ${program} >> ${nohupfile} 2>&1 &
-  return $?
+  if [ 0 -lt $(pgrep -f "${pgrep_target}" | wc -l) ]
+  then
+    echo "already started."
+  else
+    nohup ${program} >> ${nohupfile} 2>&1 &
+  fi
 }
 
 stop() {
-  pkill -f "${kill_python}"
-  return $?
+  pkill -f "${pgrep_target}" || true
+  echo "killed." >> ${logfile}
 }
 
 monitor() {
   echo $(date) monitor start
 
-  last_modified=$(date -r ${logfile} +%s)
-  # last_modified=0
-  current=$(date +%s)
-  # echo $last_modified
-  # echo $current
+  if [ ! -e ${logfile} ]; then
+    echo $(date) "log file ${logfile} does not exist."
+    echo $(date) "trying to start application."
+    stop
+    start
+  else
+    last_modified=$(date -r ${logfile} +%s)
+    current=$(date +%s)
 
-  if [ $((${last_modified} + ${monitor_threshold})) -lt ${current} ]
-  then
-      echo $(date) "it seems that the file ${logfile} is not updated in ${monitor_threshold} seconds, so try to restart."
+    if [ $((${last_modified} + ${monitor_threshold})) -lt ${current} ]
+    then
+      echo $(date) "log file ${logfile} has not been updated for ${monitor_threshold} seconds."
+      echo $(date) "trying to restart application."
       stop
       start
+    fi
   fi
 
   echo $(date) monitor end
@@ -41,23 +51,6 @@ monitor() {
 
 oneshot() {
   ${program}
-  return $?
-}
-
-clear() {
-  mongo << _eof_
-  use ${dbname}
-  db.response.remove()
-  db.gate.remove()
-_eof_
-}
-
-find() {
-  mongo << _eof_
-  use ${dbname}
-  db.response.find()
-  db.gate.find()
-_eof_
 }
 
 switch() {
@@ -72,8 +65,6 @@ switch() {
     rm ${target}
     ln -s ./${target}.${1} ./${target}
   done
-  
-  return 0
 }
 
 cd ${basedir}
@@ -83,37 +74,29 @@ if [ -e ${customenv} ]; then
     source ${customenv}
 fi
 
-# env
-
 case "$1" in
   start)
-	stop
-        start
-        ;;
+    stop
+    start
+    ;;
   stop)
-        stop
-        ;;
+    stop
+    ;;
   restart)
-        stop
-        start
-        ;;
+    stop
+    start
+    ;;
   monitor)
-        monitor
-        ;;
+    monitor
+    ;;
   oneshot)
-        oneshot
-        ;;
-  clear)
-        clear
-        ;;
-  find)
-        find
-        ;;
+    oneshot
+    ;;
   switch)
-	shift
-	switch $*
-	;;
+    shift
+    switch $*
+    ;;
   *)
-        echo $"Usage: $prog {start|stop|restart|monitor|oneshot|clear|find|switch}"
-	exit 1
+    echo $"Usage: $prog {start|stop|restart|monitor|oneshot|switch}"
+    exit 1
 esac
