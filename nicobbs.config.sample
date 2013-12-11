@@ -23,20 +23,26 @@ keys=root
 
 [logger_root]
 level=NOTSET
-handlers=default
+handlers=file
 
 [handlers]
-keys=default
+keys=stdout,file
 
-[handler_default]
+[handler_stdout]
 class=StreamHandler
 level=NOTSET
 formatter=default
 args=(sys.stdout,)
 
+[handler_file]
+class=handlers.RotatingFileHandler
+level=NOTSET
+formatter=default
+args=(os.getcwd() + "/log/nicobbs.log", 'a', (10*1024*1024), 10)
+
 [formatters]
 keys=default
 
 [formatter_default]
-format=[%(asctime)s] [%(levelname)s] %(message)s
+format=[%(asctime)s] [%(levelname)s] [%(threadName)s] %(message)s
 datefmt=

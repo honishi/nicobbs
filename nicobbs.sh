@@ -4,13 +4,14 @@ basedir=$(cd $(dirname $0);pwd)
 pyenv=${basedir}/venv/bin/activate
 program=${basedir}/nicobbs.py
 logfile=${basedir}/log/nicobbs.log
+nohupfile=${basedir}/log/nohup.out
 kill_python="python ${program}"
 monitor_threshold=$((2*60))
 dbname=$(grep database_name ${basedir}/nicobbs.config | cut -d'=' -f2 | tr -d ' ')
 customenv=${basedir}/nicobbs.env
 
 start() {
-  nohup ${program} >> ${logfile} 2>&1 &
+  nohup ${program} >> ${nohupfile} 2>&1 &
   return $?
 }
 
@@ -75,6 +76,7 @@ switch() {
   return 0
 }
 
+cd ${basedir}
 source ${pyenv}
 
 if [ -e ${customenv} ]; then

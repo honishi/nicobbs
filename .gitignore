@@ -1,10 +1,10 @@
 venv
 *.pyc
+
+log/*.log*
+log/nohup.out
+
 nicobbs.config*
 !nicobbs.config.sample
-twitter.config*
-!twitter.config.sample
 nicobbs.env*
 !nicobbs.env.sample
-
-log/*.log
