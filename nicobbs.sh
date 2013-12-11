@@ -97,6 +97,6 @@ case "$1" in
     switch $*
     ;;
   *)
-    echo $"Usage: $prog {start|stop|restart|monitor|oneshot|switch}"
+    echo $"Usage: ${0} {start|stop|restart|monitor|oneshot|switch}"
     exit 1
 esac
