@@ -2,17 +2,16 @@
 mail = user@example.com
 password = password
 database_name = dbname
-target_communities = co12345,co67890
 # ng_words = ng_word_1,ng_word_2,...
 ng_words = 
 
-[co12345]
+[community-co12345]
 consumer_key = xxx
 consumer_secret = xxx
 access_key = xxx
 access_secret = xxx
 
-[co67890]
+[community-co67890]
 consumer_key = xxx
 consumer_secret = xxx
 access_key = xxx

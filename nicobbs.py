@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-# import sys
 import logging
 import logging.config
 import ConfigParser
@@ -25,7 +24,7 @@ RESPONSE_URL = 'http://dic.nicovideo.jp/b/c/'
 DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
 RESID_REGEXP = 'ID: (.+)'
 NICOBBS_CONFIG = os.path.dirname(os.path.abspath(__file__)) + '/nicobbs.config'
-CRAWL_INTERVAL = 30
+CRAWL_INTERVAL = 20
 TWEET_INTERVAL = 3
 
 # responses/lives just crawled from the web
@@ -56,26 +55,30 @@ class NicoBBS(object):
         logging.config.fileConfig(NICOBBS_CONFIG)
         self.logger = logging.getLogger("root")
 
-        (self.mail, self.password, database_name, self.target_communities, self.ng_words) = (
-            self.get_basic_config())
+        self.mail, self.password, database_name, self.ng_words = self.get_basic_config()
         self.logger.debug(
-            "mail: %s password: xxxxxxxxxx database_name: %s "
-            "target_communities: %s ng_words: %s" %
-            (self.mail, database_name, self.target_communities, self.ng_words))
+            "mail: %s password: xxxxxxxxxx database_name: %s ng_words: %s" %
+            (self.mail, database_name, self.ng_words))
 
+        self.target_communities = []
         self.consumer_key = {}
         self.consumer_secret = {}
         self.access_key = {}
         self.access_secret = {}
-        for community in self.target_communities:
-            (self.consumer_key[community], self.consumer_secret[community],
-             self.access_key[community], self.access_secret[community]) = (
-                self.get_community_config(community))
-            self.logger.debug("*** community: " + community)
-            self.logger.debug(
-                "consumer_key: %s consumer_secret: xxxxxxxxxx" % self.consumer_key[community])
-            self.logger.debug(
-                "access_key: %s access_secret: xxxxxxxxxx" % self.access_key[community])
+
+        for (community, consumer_key, consumer_secret, access_key,
+                access_secret) in self.get_community_config():
+            self.target_communities.append(community)
+            self.consumer_key[self.target_communities[-1]] = consumer_key
+            self.consumer_secret[self.target_communities[-1]] = consumer_secret
+            self.access_key[self.target_communities[-1]] = access_key
+            self.access_secret[self.target_communities[-1]] = access_secret
+
+            self.logger.debug("*** community: " + self.target_communities[-1])
+            self.logger.debug("consumer_key: %s consumer_secret: xxxxxxxxxx" %
+                              self.consumer_key[self.target_communities[-1]])
+            self.logger.debug("access_key: %s access_secret: xxxxxxxxxx" %
+                              self.access_key[self.target_communities[-1]])
 
         self.connection = pymongo.Connection()
         self.database = self.connection[database_name]
@@ -87,30 +90,37 @@ class NicoBBS(object):
     def get_basic_config(self):
         config = ConfigParser.ConfigParser()
         config.read(NICOBBS_CONFIG)
+        section = "nicobbs"
 
-        mail = config.get("nicobbs", "mail")
-        password = config.get("nicobbs", "password")
-        database_name = config.get("nicobbs", "database_name")
-        target_communities = config.get("nicobbs", "target_communities").split(',')
-        ng_words = config.get("nicobbs", "ng_words")
+        mail = config.get(section, "mail")
+        password = config.get(section, "password")
+        database_name = config.get(section, "database_name")
+        ng_words = config.get(section, "ng_words")
         if ng_words == '':
             ng_words = []
         else:
             ng_words = ng_words.split(',')
 
-        return (mail, password, database_name, target_communities, ng_words)
+        return mail, password, database_name, ng_words
 
-    def get_community_config(self, community):
+    def get_community_config(self):
+        result = []
+
         config = ConfigParser.ConfigParser()
         config.read(NICOBBS_CONFIG)
-        section = community
 
-        consumer_key = config.get(section, "consumer_key")
-        consumer_secret = config.get(section, "consumer_secret")
-        access_key = config.get(section, "access_key")
-        access_secret = config.get(section, "access_secret")
+        for section in config.sections():
+            matched = re.match(r'community-(.+)', section)
+            if matched:
+                community = matched.group(1)
+                consumer_key = config.get(section, "consumer_key")
+                consumer_secret = config.get(section, "consumer_secret")
+                access_key = config.get(section, "access_key")
+                access_secret = config.get(section, "access_secret")
+                result.append(
+                    (community, consumer_key, consumer_secret, access_key, access_secret))
 
-        return (consumer_key, consumer_secret, access_key, access_secret)
+        return result
 
 # twitter
     def update_twitter_status(self, community, status):
@@ -521,10 +531,11 @@ class NicoBBS(object):
         for live in unprocessed_lives:
             self.logger.debug("processing live %s" % live["link"])
 
-            message = (u"「" + live["community_name"] + u"」で生放送「" + live["title"] +
-                       u"」が予約されました。" + live["date"] + u" " + live["link"])
+            status = (u"【放送予約】「" + live["community_name"] + u"」で生放送「" +
+                      live["title"] + u"」が予約されました。" + live["date"] + u" " +
+                      live["link"])
             try:
-                self.update_twitter_status(community, message)
+                self.update_twitter_status(community, status)
             except TwitterDuplicateStatusUpdateError, error:
                 self.logger.error("twitter status update error, duplicate: %s", error)
                 self.update_live_status(live, STATUS_DUPLICATE)
@@ -534,7 +545,7 @@ class NicoBBS(object):
                 break
             else:
                 self.update_live_status(live, STATUS_COMPLETED)
-                self.logger.info("status updated: [%s]" % message)
+                self.logger.info("status updated: [%s]" % status)
 
         self.logger.info("completed to process reserved lives")
 
@@ -565,7 +576,7 @@ class NicoBBS(object):
             self.logger.debug("processing news %s" % news["date"])
 
             statuses = nicoutil.create_twitter_statuses(
-                u"[お知らせ更新]\n" +
+                u"【お知らせ更新】\n" +
                 u"「%s」(%s)\n\n" % (news["title"], news["name"]),
                 u'[続き]\n', news["desc"], u'\n[続く]')
 
@@ -616,9 +627,9 @@ class NicoBBS(object):
             self.logger.debug("processing video %s" % video["link"])
 
             statuses = nicoutil.create_twitter_statuses(
-                u"[コミュニティ動画投稿]\n",
+                u"【コミュニティ動画投稿】",
                 u'[続き]\n',
-                u"動画「%s」が投稿されました。\n%s" % (video["title"], video["link"]),
+                u"動画「%s」が投稿されました。%s" % (video["title"], video["link"]),
                 u'\n[続く]')
 
             for status in statuses:
