@@ -1,5 +1,7 @@
 nicobbs to twitter
 ==
+[![Build Status](https://travis-ci.org/honishi/nicobbs.png?branch=develop)](https://travis-ci.org/honishi/nicobbs)
+
 scraping niconama bbs, and update status to twitter.
 
 sample
