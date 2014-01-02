@@ -87,7 +87,7 @@ def check(target):
     for status in statuses:
         print u"*** index: %d length: %d status: [%s]\n" % (index, len(status), status)
 
-        # adjust length of url string is always be 23 bytes length
+        # adjust length of url string always be 23 bytes
         status = re.sub(nicoutil.REGEXP_HTTP, '12345678901234567890123', status)
         status = re.sub(nicoutil.REGEXP_GOOGLE, '12345678901234567890123', status)
 

@@ -74,14 +74,18 @@ $ ./nicobss.sh stop
 
 monitoring example using crontab
 --
+see `nicobbs.sh` inside for the details of monitoring.
+
 	# monitoring nicoalert
 	* * * * * /path/to/nicobbs/nicobbs.sh monitor >> /path/to/nicobbs/log/monitor.log 2>&1
 
 snippets for me
 --
-copy collection to another database.
+copy collections to another database.
 ````
 use dev-nicobbs-v2
+db.response.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['response'].insert(d); });
+db.live.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['live'].insert(d); });
 db.news.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['news'].insert(d); });
 db.video.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['video'].insert(d); });
 ````

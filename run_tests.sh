@@ -12,4 +12,4 @@ set -e
 #   fi
 # done
 
-py.test test_*
+py.test tests
