@@ -18,6 +18,7 @@ BASE_URL_COMMUNITY = u'http://com.nicovideo.jp/community/'
 # - mail, http://bit.ly/1f2qKGZ
 # - twitter account, http://stackoverflow.com/a/4424288
 REGEXP_HTTP = r'https?://[\w/:%#\$&\?\(\)~\.=\+\-]+'
+REGEXP_GOOGLE = r'goo.gl/[\w/:%#\$&\?\(\)~\.=\+\-]+'
 REGEXP_MAIL = (
     r"[\w!#$%&'*+/=?^_{}\\|~-]+(?:\.[\w!#$%&'*+/=?^_{}\\|~-]+)*@(?:[\w][\w-]*\.)+[\w][\w-]*")
 REGEXP_TWITTER = r'@[A-Za-z0-9_]{1,15}'
@@ -86,7 +87,7 @@ def create_twitter_statuses(header, continued_mark, body, continue_mark):
     chunk_type = CHUNK_TYPE_UNKNOWN
     remaining_length = available_length
 
-    regexp = u'(%s|%s|%s)' % (REGEXP_HTTP, REGEXP_MAIL, REGEXP_TWITTER)
+    regexp = u'(%s|%s|%s|%s)' % (REGEXP_HTTP, REGEXP_GOOGLE, REGEXP_MAIL, REGEXP_TWITTER)
     chunks = re.split(regexp, body)
 
     for chunk in chunks:
@@ -94,7 +95,7 @@ def create_twitter_statuses(header, continued_mark, body, continue_mark):
         # print u'remaining_length, pre-processed: %d' % remaining_length
 
         chunk_length = 0
-        if re.match(REGEXP_HTTP, chunk):
+        if re.match(REGEXP_HTTP, chunk) or re.match(REGEXP_GOOGLE, chunk):
             chunk_type = CHUNK_TYPE_HTTP
             chunk_length = TCO_URL_LENGTH
         elif re.match(REGEXP_MAIL, chunk):
@@ -174,13 +175,17 @@ abc
     mail_and_twitter_string = """\
 あるhttp://example.com/aaaaaaaaa/bbbbbbbbbbところに、test@example.comを持っている百姓が@testありました。
 """
+    long_string = """\
+谷津駅-習志野市コンビニ 2.6km [goo.gl/JGdbXl]\n0102 さっき倒れていた、ダメットがしばらくパソコンを預かる。\n　　 コメントに反応できているのでまだ余裕はありそう。\n 　　 裏では西岡が配信をとっている様子でしゃべりまくっている。\n0105 全裸待機中、リア凸。タウリン3000mgをケースで差し入れ。\n　　 XL一枚購入。\n　　 サイコロ「5」緑「5000円ですー。」\n　　 全裸待機中、暗黒札をもらって「つかいますー。」\n　　 リスナー、リア凸。リポビタンD二本を差し入れ。\n　　 よっさんに、なけなしの1000円を差し入れ。\n　　 10秒以内によっさんのBSPを打ってくれたらもらうことに。\n　　 ぎりぎり10秒ではまにあわず。よさんBSP「かな 」\n    \n(省略しています。全て読むにはこのリンクをクリック！)
+"""
     target = (
         # original_string
         # test_string
         # short_string
         # http_string
         # nico_string
-        mail_and_twitter_string
+        # mail_and_twitter_string
+        long_string
     )
 
     # need to convert body from str type to unicode type

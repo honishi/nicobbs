@@ -24,7 +24,7 @@ RESPONSE_URL = 'http://dic.nicovideo.jp/b/c/'
 DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
 RESID_REGEXP = 'ID: (.+)'
 NICOBBS_CONFIG = os.path.dirname(os.path.abspath(__file__)) + '/nicobbs.config'
-CRAWL_INTERVAL = 20
+CRAWL_INTERVAL = 30
 TWEET_INTERVAL = 3
 
 # responses/lives just crawled from the web
@@ -41,11 +41,21 @@ STATUS_COMPLETED = "COMPLETED"
 LOG_SEPARATOR = "---------- ---------- ---------- ---------- ----------"
 
 
-class TwitterDuplicateStatusUpdateError(Exception):
+class TwitterStatusUpdateError(Exception):
+# magic methods
+    def __init__(self, message="", code=0):
+        self.message = message
+        self.code = code
+
+    def __str__(self):
+        return "status: [%s] code: [%d]" % (self.message, self.code)
+
+
+class TwitterDuplicateStatusUpdateError(TwitterStatusUpdateError):
     pass
 
 
-class TwitterStatusUpdateError(Exception):
+class TwitterOverUpdateLimitError(TwitterStatusUpdateError):
     pass
 
 
@@ -144,13 +154,19 @@ class NicoBBS(object):
             normalized_reasons_string = re.sub("u'(.+?)'", r'"\1"', error.reason)
 
             reasons = json.loads(normalized_reasons_string)
-            print reasons
+            # logging.debug("reasons: %s %s" % (type(reasons), reasons))
             for reason in reasons:
-                print reason
+                # logging.debug("reason: %s %s" % (type(reason), reason))
                 if reason["code"] == 187:
-                    # 'Status is a duplicate'
-                    raise TwitterDuplicateStatusUpdateError
-            raise TwitterStatusUpdateError
+                    # 'Status is a duplicate.'
+                    raise TwitterDuplicateStatusUpdateError(reason["message"], reason["code"])
+                elif reason["code"] == 186:
+                    # 'Status is over 140 characters.'
+                    raise TwitterStatusUpdateError(reason["message"], reason["code"])
+                elif reason["code"] == 185:
+                    # 'User is over daily status update limit.'
+                    raise TwitterOverUpdateLimitError(reason["message"], reason["code"])
+            raise TwitterStatusUpdateError()
 
 # nico nico
     def create_opener(self):
@@ -494,6 +510,10 @@ class NicoBBS(object):
                     self.logger.error("twitter status update error, duplicate: %s" % error)
                     self.update_response_status(response, STATUS_DUPLICATE)
                     break
+                except TwitterOverUpdateLimitError, error:
+                    # quit this status update sequence
+                    self.logger.error("twitter status update error, over limit: %s" % error)
+                    raise
                 except TwitterStatusUpdateError, error:
                     # twitter error case including api limit
                     # response status should not be changed here for future retrying
@@ -540,6 +560,9 @@ class NicoBBS(object):
                 self.logger.error("twitter status update error, duplicate: %s", error)
                 self.update_live_status(live, STATUS_DUPLICATE)
                 break
+            except TwitterOverUpdateLimitError, error:
+                self.logger.error("twitter status update error, over limit: %s" % error)
+                raise
             except TwitterStatusUpdateError, error:
                 self.logger.error("twitter status update error, unknown")
                 break
@@ -590,6 +613,9 @@ class NicoBBS(object):
                     self.logger.error("twitter status update error, duplicate: %s" % error)
                     self.update_news_status(news, STATUS_DUPLICATE)
                     break
+                except TwitterOverUpdateLimitError, error:
+                    self.logger.error("twitter status update error, over limit: %s" % error)
+                    raise
                 except TwitterStatusUpdateError, error:
                     self.logger.error("twitter status update error, unknown: %s" % error)
                     break
@@ -642,6 +668,9 @@ class NicoBBS(object):
                     self.logger.error("twitter status update error, duplicate: %s" % error)
                     self.update_video_status(video, STATUS_DUPLICATE)
                     break
+                except TwitterOverUpdateLimitError, error:
+                    self.logger.error("twitter status update error, over limit: %s" % error)
+                    raise
                 except TwitterStatusUpdateError, error:
                     self.logger.error("twitter status update error, unknown: %s" % error)
                     break
@@ -665,27 +694,37 @@ class NicoBBS(object):
                 for community in self.target_communities:
                     self.logger.debug(LOG_SEPARATOR)
                     try:
-                        self.crawl_bbs_response(opener, community)
-                        self.tweet_bbs_response(community)
-                    except Exception, error:
-                        self.logger.error(
-                            "*** caught error when processing bbs, error: %s" % error)
-                        if isinstance(error, urllib2.HTTPError) and error.code == 403:
-                            self.logger.info("bbs is closed?")
+                        try:
+                            self.crawl_bbs_response(opener, community)
+                            self.tweet_bbs_response(community)
+                        except TwitterOverUpdateLimitError:
+                            raise
+                        except urllib2.HTTPError, error:
+                            self.logger.error(
+                                "*** caught http error when processing bbs, error: %s" % error)
+                            if error.code == 403:
+                                self.logger.info("bbs is closed?")
+                        except Exception, error:
+                            self.logger.error(
+                                "*** caught error when processing bbs, error: %s" % error)
 
-                    try:
-                        rawhtml = self.read_community_page(opener, COMMUNITY_TOP_URL, community)
-                        self.crawl_reserved_live(rawhtml, community)
-                        self.tweet_reserved_live(community)
-                        self.crawl_news(rawhtml, community)
-                        self.tweet_news(community)
+                        try:
+                            rawhtml = self.read_community_page(opener, COMMUNITY_TOP_URL, community)
+                            self.crawl_reserved_live(rawhtml, community)
+                            self.tweet_reserved_live(community)
+                            self.crawl_news(rawhtml, community)
+                            self.tweet_news(community)
 
-                        rawhtml = self.read_community_page(opener, COMMUNITY_VIDEO_URL, community)
-                        self.crawl_video(rawhtml, community)
-                        self.tweet_video(community)
-                    except Exception, error:
-                        self.logger.error(
-                            "*** caught error when processing live/video, error: %s" % error)
+                            rawhtml = self.read_community_page(opener, COMMUNITY_VIDEO_URL, community)
+                            self.crawl_video(rawhtml, community)
+                            self.tweet_video(community)
+                        except TwitterOverUpdateLimitError:
+                            raise
+                        except Exception, error:
+                            self.logger.error(
+                                "*** caught error when processing live/video, error: %s" % error)
+                    except TwitterOverUpdateLimitError:
+                        self.logger.warning("status update over limit, so skip.")
 
             self.logger.debug(LOG_SEPARATOR)
             self.logger.debug("*** sleeping %d secs..." % CRAWL_INTERVAL)
