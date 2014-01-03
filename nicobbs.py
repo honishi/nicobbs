@@ -478,7 +478,7 @@ class NicoBBS(object):
         logging.debug("registered: %s" % registered_responses)
         logging.info("completed to crawl responses")
 
-    def tweet_bbs_response(self, community):
+    def tweet_bbs_response(self, community, limit=0):
         unprocessed_responses = self.get_responses_with_community_and_status(
             community, STATUS_UNPROCESSED)
         tweet_count = 0
@@ -530,6 +530,11 @@ class NicoBBS(object):
                     logging.info("status updated: [%s]" % status)
                 tweet_count += 1
 
+            if limit and limit <= tweet_count:
+                logging.info("breaking tweet processing, limit: %d tweet_count: %d" %
+                             (limit, tweet_count))
+                break
+
         logging.info("completed to process responses")
 
     # reserved live
@@ -547,7 +552,7 @@ class NicoBBS(object):
 
         logging.info("completed to crawl reserved lives")
 
-    def tweet_reserved_live(self, community):
+    def tweet_reserved_live(self, community, limit=0):
         unprocessed_lives = self.get_lives_with_community_and_status(
             community, STATUS_UNPROCESSED)
 
@@ -576,6 +581,11 @@ class NicoBBS(object):
                 self.update_live_status(live, STATUS_COMPLETED)
                 logging.info("status updated: [%s]" % status)
 
+            if limit and limit <= tweet_count:
+                logging.info("breaking tweet processing, limit: %d tweet_count: %d" %
+                             (limit, tweet_count))
+                break
+
         logging.info("completed to process reserved lives")
 
     # news
@@ -593,7 +603,7 @@ class NicoBBS(object):
 
         logging.info("completed to crawl news")
 
-    def tweet_news(self, community):
+    def tweet_news(self, community, limit=0):
         unprocessed_news = self.get_news_with_community_and_status(
             community, STATUS_UNPROCESSED)
         tweet_count = 0
@@ -630,6 +640,11 @@ class NicoBBS(object):
                     logging.info("status updated: [%s]" % status)
                 tweet_count += 1
 
+            if limit and limit <= tweet_count:
+                logging.info("breaking tweet processing, limit: %d tweet_count: %d" %
+                             (limit, tweet_count))
+                break
+
         logging.info("completed to process news")
 
     # video
@@ -647,7 +662,7 @@ class NicoBBS(object):
 
         logging.info("completed to crawl video")
 
-    def tweet_video(self, community):
+    def tweet_video(self, community, limit=0):
         unprocessed_videos = self.get_video_with_community_and_status(
             community, STATUS_UNPROCESSED)
         tweet_count = 0
@@ -684,6 +699,11 @@ class NicoBBS(object):
                     self.update_video_status(video, STATUS_COMPLETED)
                     logging.info("status updated: [%s]" % status)
                 tweet_count += 1
+
+            if limit and limit <= tweet_count:
+                logging.info("breaking tweet processing, limit: %d tweet_count: %d" %
+                             (limit, tweet_count))
+                break
 
         logging.info("completed to process video")
 

@@ -12,5 +12,6 @@ do
   fi
 done
 
-# py.test tests
+mongo ${DATABASE_NAME} ./credb.js --verbose
+
 py.test --pep8 --cov nicobbs.py --cov nicoutil.py tests
