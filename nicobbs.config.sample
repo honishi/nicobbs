@@ -1,7 +1,7 @@
 [nicobbs]
-mail = user@example.com
-password = password
-database_name = dbname
+mail = mail@example.com
+password = p@ssword
+database_name = your_dbname
 # ng_words = ng_word_1,ng_word_2,...
 ng_words = 
 

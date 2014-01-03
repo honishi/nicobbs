@@ -27,49 +27,17 @@ $ pip install -r requirements.txt
 
 configure mongo
 --
-database indexes are needed for proper query execution plan.
+run the following script to create indexes that are needed for proper query execution plan.
 
-(optional) check current scheme.
 ````
-$ mongo
-show dbs
-use dev-nicobbs-v2
-show collections
-
-// we store scraped contents into the following collections that are named 'response', 'live', 'news' and 'video'
-db.response.find()
-db.response.getIndexes()
-db.live.find()
-db.live.getIndexes()
-db.news.find()
-db.news.getIndexes()
-db.video.find()
-db.video.getIndexes()
-````
-
-(required) create indexes.
-````
-db.response.ensureIndex({community:1, number:1})
-db.response.ensureIndex({community:1, status:1})
-
-db.live.ensureIndex({community:1, link:1})
-db.live.ensureIndex({community:1, status:1})
-
-db.news.ensureIndex({community:1, date:1})
-db.news.ensureIndex({community:1, status:1})
-
-db.video.ensureIndex({community:1, link:1})
-db.video.ensureIndex({community:1, status:1})
+$ mongo your_database_name ./credb.js
 ````
 
 kick
 --
-start.
+just start, and stop.
 ````
 $ ./nicobbs.sh start
-````
-stop.
-````
 $ ./nicobss.sh stop
 ````
 
@@ -84,11 +52,11 @@ snippets for me
 --
 copy collections to another database.
 ````
-use dev-nicobbs-v2
-db.response.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['response'].insert(d); });
-db.live.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['live'].insert(d); });
-db.news.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['news'].insert(d); });
-db.video.find().forEach(function(d){ db.getSiblingDB('nicobbs-v2')['video'].insert(d); });
+use from_database_name
+db.response.find().forEach(function(d){ db.getSiblingDB('to_database_name')['response'].insert(d); });
+db.live.find().forEach(function(d){ db.getSiblingDB('to_database_name')['live'].insert(d); });
+db.news.find().forEach(function(d){ db.getSiblingDB('to_database_name')['news'].insert(d); });
+db.video.find().forEach(function(d){ db.getSiblingDB('to_database_name')['video'].insert(d); });
 ````
 - http://stackoverflow.com/a/11554924
 

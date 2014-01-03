@@ -739,4 +739,3 @@ class NicoBBS(object):
 if __name__ == "__main__":
     nicobbs = NicoBBS()
     nicobbs.start()
-    # nicobbs.update_twitter_status("co1827022", "test")
