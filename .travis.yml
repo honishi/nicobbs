@@ -5,3 +5,12 @@ install:
 - pip install http://sourceforge.net/projects/pychecker/files/pychecker/0.8.19/pychecker-0.8.19.tar.gz/download
 - pip install -r requirements.txt --use-mirrors
 script: ./run_tests.sh
+after_success:
+- coveralls
+env:
+  global:
+  # twitter api credentials
+  - secure: GZNiwhZVpOcvHTQH2FG0v+z5HhSVoZxXMpMg72+9D5fej6DoVmiRnsPBwbn4HWLEvCHWB1c7KaL1mKOjKRAnm3Vui65P/6Yz0MfswF9PLE3IgeMor78eDGOkpQf5v5WAiJwcZxtsaf0o+FWUEApoSEnS0ZcR8R7Tzs83mftHqis=
+  - secure: YryFIcOU2iR0HVblacp1/+EU7NI7O/X7pSDT/zwGJh1dxeWQphyE7L1wwLo972K44QXkxETTTii2h/o0Hj54UJfa8db+Ij0ucsI+492AMiqHQwGkjYFCmLmaXImGhUDznpvLmyXJdg1e3NYsyukgWPrhhUHpDltQRDnZN1gIqpU=
+  - secure: MbWPyIkCw4wbebt4KxM9O48RstyoKF1FJ0iYD3tcHt7a9xYDahIiU0hon8PhcK6TjSHg19YKMFhLH/hhuwpfiH/Z0JF9XCKlKpj2V8mAP5M0HfVuqd+ENR39owN7N3zCfUqcgOTG9PRES26TNKcHb1nZlglt7+UtoXF2tzM3cNQ=
+  - secure: QKH2vOiHvJ+i9PkMMRiZ/kvP1GSAN4/CmmxPKZnxrOzVGqZARoZhXaRnL20FOrKT82lKJF7oyEeSDRA5Or8VSPXhZD1iyq5BpaePUj9BBY7r//nnMas6+jPrD+QJevQeJczIdS2Z5kPIy1FyzerVo0Ty1A5G6/o+USuez/gFuw0=

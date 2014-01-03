@@ -1,6 +1,7 @@
 nicobbs to twitter
 ==
 [![Build Status](https://travis-ci.org/honishi/nicobbs.png?branch=develop)](https://travis-ci.org/honishi/nicobbs)
+[![Coverage Status](https://coveralls.io/repos/honishi/nicobbs/badge.png)](https://coveralls.io/r/honishi/nicobbs)
 
 scraping niconama bbs, and update status to twitter.
 

@@ -1,10 +1,11 @@
 venv
 *.pyc
+.cache
+.coverage
 
 log/*.log*
 log/nohup.out
 
-nicobbs.config*
-!nicobbs.config.sample
-nicobbs.env*
-!nicobbs.env.sample
+*.config*
+*.env*
+!*.sample
