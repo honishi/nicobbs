@@ -11,8 +11,9 @@ DUMMY_CREDENTIAL_KEY = "dummy"
 
 
 def pytest_funcarg__bbs(request):
-    bbs = nicobbs.NicoBBS()
+    bbs = nicobbs.NicoBBS(is_test=True)
 
+    # inject twitter credentials to bbs instance
     bbs.consumer_key[DUMMY_CREDENTIAL_KEY] = os.environ.get("CONSUMER_KEY")
     bbs.consumer_secret[DUMMY_CREDENTIAL_KEY] = os.environ.get("CONSUMER_SECRET")
     bbs.access_key[DUMMY_CREDENTIAL_KEY] = os.environ.get("ACCESS_KEY")
