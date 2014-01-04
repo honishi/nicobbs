@@ -42,31 +42,7 @@ def pytest_funcarg__bbs(request):
 
 
 def test_main(bbs):
-    opener = bbs.create_opener()
-    assert opener is not None
-
-    for community in bbs.target_communities:
-        # bbs
-        bbs.crawl_bbs_response(opener, community)
-        bbs.tweet_bbs_response(community, 1)
-
-        # reserved live & news
-        rawhtml = bbs.read_community_page(opener, nicobbs.COMMUNITY_TOP_URL, community)
-        assert rawhtml is not None
-
-        bbs.crawl_reserved_live(rawhtml, community)
-        bbs.tweet_reserved_live(community, 1)
-        bbs.crawl_news(rawhtml, community)
-        bbs.tweet_news(community, 1)
-
-        # video
-        rawhtml = bbs.read_community_page(opener, nicobbs.COMMUNITY_VIDEO_URL, community)
-        assert rawhtml is not None
-
-        bbs.crawl_video(rawhtml, community)
-        bbs.tweet_video(community, 1)
-
-    assert True
+    bbs.start(1)
 
 
 def test_tweet(bbs):

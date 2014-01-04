@@ -35,7 +35,7 @@ $ mongo your_database_name ./credb.js
 
 kick
 --
-just start, and stop.
+just use start, and stop.
 ````
 $ ./nicobbs.sh start
 $ ./nicobss.sh stop

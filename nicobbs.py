@@ -708,7 +708,7 @@ class NicoBBS(object):
         logging.info("completed to process video")
 
 # main
-    def start(self):
+    def start(self, limit=0):
         # inifinite loop
         while True:
             try:
@@ -722,7 +722,7 @@ class NicoBBS(object):
                     try:
                         try:
                             self.crawl_bbs_response(opener, community)
-                            self.tweet_bbs_response(community)
+                            self.tweet_bbs_response(community, limit)
                         except TwitterOverUpdateLimitError:
                             raise
                         except urllib2.HTTPError, error:
@@ -737,13 +737,13 @@ class NicoBBS(object):
                         try:
                             rawhtml = self.read_community_page(opener, COMMUNITY_TOP_URL, community)
                             self.crawl_reserved_live(rawhtml, community)
-                            self.tweet_reserved_live(community)
+                            self.tweet_reserved_live(community, limit)
                             self.crawl_news(rawhtml, community)
-                            self.tweet_news(community)
+                            self.tweet_news(community, limit)
 
                             rawhtml = self.read_community_page(opener, COMMUNITY_VIDEO_URL, community)
                             self.crawl_video(rawhtml, community)
-                            self.tweet_video(community)
+                            self.tweet_video(community, limit)
                         except TwitterOverUpdateLimitError:
                             raise
                         except Exception, error:
@@ -752,9 +752,13 @@ class NicoBBS(object):
                     except TwitterOverUpdateLimitError:
                         logging.warning("status update over limit, so skip.")
 
-            logging.debug(LOG_SEPARATOR)
-            logging.debug("*** sleeping %d secs..." % CRAWL_INTERVAL)
-            time.sleep(CRAWL_INTERVAL)
+            if limit:
+                break
+            else:
+                logging.debug(LOG_SEPARATOR)
+                logging.debug("*** sleeping %d secs..." % CRAWL_INTERVAL)
+                time.sleep(CRAWL_INTERVAL)
+
 
 if __name__ == "__main__":
     nicobbs = NicoBBS()

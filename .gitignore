@@ -2,6 +2,7 @@ venv
 *.pyc
 .cache
 .coverage
+htmlcov
 
 log/*.log*
 log/nohup.out
