@@ -555,6 +555,7 @@ class NicoBBS(object):
     def tweet_reserved_live(self, community, limit=0):
         unprocessed_lives = self.get_lives_with_community_and_status(
             community, STATUS_UNPROCESSED)
+        tweet_count = 0
 
         logging.info("*** processing lives, community: %s unprocessed: %d" %
                      (community, unprocessed_lives.count()))
@@ -580,6 +581,7 @@ class NicoBBS(object):
             else:
                 self.update_live_status(live, STATUS_COMPLETED)
                 logging.info("status updated: [%s]" % status)
+            tweet_count += 1
 
             if limit and limit <= tweet_count:
                 logging.info("breaking tweet processing, limit: %d tweet_count: %d" %

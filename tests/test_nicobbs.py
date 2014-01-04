@@ -18,6 +18,9 @@ TEST_ACCESS_SECRET = os.environ.get("ACCESS_SECRET")
 TEST_DATABASE_NAME = os.environ.get("DATABASE_NAME")
 TEST_COMMUNITY_ID = os.environ.get("COMMUNITY_ID")
 
+DUMMY_COMMUNITY_TOP_PAGE = (os.path.dirname(os.path.abspath(__file__)) +
+                            '/dummy_community_top_page.html')
+
 
 # create instance & inject setting
 def pytest_funcarg__bbs(request):
@@ -42,7 +45,25 @@ def pytest_funcarg__bbs(request):
 
 
 def test_main(bbs):
-    bbs.start(1)
+    bbs.start(2)
+
+
+# reserved live should be test using dummy static content
+# because it usually not be provided at real community page
+def test_live_and_news(bbs):
+    for community in bbs.target_communities:
+        # reserved live & news
+        f = open(DUMMY_COMMUNITY_TOP_PAGE)
+        rawhtml = f.read()
+        f.close()
+        assert rawhtml is not None
+
+        bbs.crawl_reserved_live(rawhtml, community)
+        bbs.tweet_reserved_live(community, 2)
+        bbs.crawl_news(rawhtml, community)
+        bbs.tweet_news(community, 2)
+
+    assert True
 
 
 def test_tweet(bbs):
