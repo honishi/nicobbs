@@ -40,6 +40,8 @@ def create_finalized_statuses(status_bodies, header, continued_mark, continue_ma
     finalized_statuses = []
     status_bodies_count = len(status_bodies)
 
+    header = re.sub(REGEXP_TWITTER_REPLACE_FROM, REGEXP_TWITTER_REPLACE_TO, header)
+
     index = 0
     for status_body in status_bodies:
         if ENABLE_MASKING_TWITTER:
