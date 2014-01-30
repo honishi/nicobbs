@@ -8,9 +8,11 @@ TCO_URL_LENGTH = 23
 
 REGEXP_VIDEO = r'sm\d{3,}'
 REGEXP_LIVE = r'lv\d{3,}'
+REGEXP_SEIGA = r'im\d{3,}'
 REGEXP_COMMUNITY = r'co\d{2,}'
 BASE_URL_VIDEO = u'http://www.nicovideo.jp/watch/'
 BASE_URL_LIVE = u'http://live.nicovideo.jp/watch/'
+BASE_URL_SEIGA = u'http://seiga.nicovideo.jp/seiga/'
 BASE_URL_COMMUNITY = u'http://com.nicovideo.jp/community/'
 
 # regexp for...
@@ -67,6 +69,8 @@ def replace_body(body):
                   BASE_URL_VIDEO + r'\1', body)
     body = re.sub(r'>>(' + REGEXP_LIVE + r')\n' + REGEXP_LIVE,
                   BASE_URL_LIVE + r'\1', body)
+    body = re.sub(r'>>(' + REGEXP_SEIGA + r')\n' + REGEXP_SEIGA,
+                  BASE_URL_SEIGA + r'\1', body)
     body = re.sub(r'>>(' + REGEXP_COMMUNITY + r')\n' + REGEXP_COMMUNITY,
                   BASE_URL_COMMUNITY + r'\1', body)
 
