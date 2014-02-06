@@ -261,6 +261,8 @@ class NicoBBS(object):
     def postfilter_message(self, message):
         message = re.sub(u"\(省略しています。全て読むにはこのリンクをクリック！\)",
                          u"(省略)", message)
+        message = re.sub(u"\(画像をクリックして再生!!\)",
+                         u"(画像)", message)
         return message
 
 # scraping utility
