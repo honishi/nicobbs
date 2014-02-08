@@ -263,6 +263,8 @@ class NicoBBS(object):
                          u"(省略)", message)
         message = re.sub(u"画像をクリックして再生!!",
                          u"(画像)", message)
+        message = re.sub(u"この絵を基にしています！",
+                         u"", message)
         return message
 
 # scraping utility
