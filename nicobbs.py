@@ -506,7 +506,7 @@ class NicoBBS(object):
             # create statuses
             response_body = self.postfilter_message(response_body)
             statuses = nicoutil.create_twitter_statuses(
-                u'(' + response_name + u')\n', u'[続き]\n', response_body, u'\n[続く]')
+                u'(' + response_name + u')\n', u'[続き] ', response_body, u' [続く]')
 
             for status in statuses:
                 if 0 < tweet_count:
@@ -623,7 +623,7 @@ class NicoBBS(object):
             statuses = nicoutil.create_twitter_statuses(
                 u"【お知らせ更新】\n" +
                 u"「%s」(%s)\n\n" % (news["title"], news["name"]),
-                u'[続き]\n', news["desc"], u'\n[続く]')
+                u'[続き] ', news["desc"], u' [続く]')
 
             for status in statuses:
                 if 0 < tweet_count:
@@ -681,9 +681,9 @@ class NicoBBS(object):
 
             statuses = nicoutil.create_twitter_statuses(
                 u"【コミュニティ動画投稿】",
-                u'[続き]\n',
+                u'[続き] ',
                 u"動画「%s」が投稿されました。%s" % (video["title"], video["link"]),
-                u'\n[続く]')
+                u' [続く]')
 
             for status in statuses:
                 if 0 < tweet_count:
