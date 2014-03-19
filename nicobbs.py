@@ -265,6 +265,7 @@ class NicoBBS(object):
                          u"(画像)", message)
         message = re.sub(u"この絵を基にしています！",
                          u"", message)
+        message = re.sub(u"\n\n", u"\n", message)
         return message
 
 # scraping utility
