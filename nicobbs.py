@@ -494,6 +494,7 @@ class NicoBBS(object):
         for response in unprocessed_responses:
             logging.debug("processing response #%s" % response["number"])
 
+            response_number = response["number"]
             response_name = response["name"]
             response_body = response["body"]
 
@@ -507,7 +508,8 @@ class NicoBBS(object):
             # create statuses
             response_body = self.postfilter_message(response_body)
             statuses = nicoutil.create_twitter_statuses(
-                u'(' + response_name + u')\n', u'[続き] ', response_body, u' [続く]')
+                u'(' + response_number + u': ' + response_name + u')\n',
+                u'[続き] ', response_body, u' [続く]')
 
             for status in statuses:
                 if 0 < tweet_count:
