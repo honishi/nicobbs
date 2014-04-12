@@ -14,6 +14,7 @@ done
 
 mongo ${DATABASE_NAME} ./credb.js --verbose
 
+# py.test -s \
 py.test \
   --pep8 \
   --cov-report term --cov-report html \

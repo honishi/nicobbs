@@ -17,12 +17,12 @@ requirements
 setup
 --
 ````
-$ git submodule update --init
-$ virtualenv --distribute venv
-$ source ./venv/bin/activate
-$ pip install http://sourceforge.net/projects/pychecker/files/pychecker/0.8.19/pychecker-0.8.19.tar.gz/download
-$ sudo apt-get install libxml2-dev libxslt-dev
-$ pip install -r requirements.txt
+git submodule update --init
+virtualenv --distribute venv
+source ./venv/bin/activate
+pip install http://sourceforge.net/projects/pychecker/files/pychecker/0.8.19/pychecker-0.8.19.tar.gz/download
+sudo apt-get install libxml2-dev libxslt-dev
+pip install -r requirements.txt
 ````
 
 configure mongo
@@ -30,15 +30,15 @@ configure mongo
 run the following script to create indexes that are needed for proper query execution plan.
 
 ````
-$ mongo your_database_name ./credb.js
+mongo your_database_name ./credb.js
 ````
 
 kick
 --
 just use start, and stop.
 ````
-$ ./nicobbs.sh start
-$ ./nicobss.sh stop
+./nicobbs.sh start
+./nicobss.sh stop
 ````
 
 monitoring example using crontab

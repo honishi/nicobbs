@@ -20,12 +20,13 @@ LOGIN_URL = 'https://secure.nicovideo.jp/secure/login'
 COMMUNITY_TOP_URL = 'http://com.nicovideo.jp/community/'
 COMMUNITY_VIDEO_URL = 'http://com.nicovideo.jp/video/'
 COMMUNITY_BBS_URL = 'http://com.nicovideo.jp/bbs/'
-RESPONSE_URL = 'http://dic.nicovideo.jp/b/c/'
+CHANNEL_BASE_URL = 'http://ch.nicovideo.jp/'
 DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
 RESID_REGEXP = 'ID: (.+)'
 NICOBBS_CONFIG = os.path.dirname(os.path.abspath(__file__)) + '/nicobbs.config'
 NICOBBS_CONFIG_SAMPLE = NICOBBS_CONFIG + '.sample'
 CRAWL_INTERVAL = 30
+COMMUNITY_INTERVAL = 5
 TWEET_INTERVAL = 3
 
 # responses/lives just crawled from the web
@@ -62,9 +63,9 @@ class TwitterOverUpdateLimitError(TwitterStatusUpdateError):
 
 class NicoBBS(object):
 # life cycle
-    def __init__(self, is_test=False):
+    def __init__(self):
         config_file = NICOBBS_CONFIG
-        if is_test:
+        if not os.path.exists(config_file):
             config_file = NICOBBS_CONFIG_SAMPLE
 
         logging.config.fileConfig(config_file)
@@ -174,7 +175,7 @@ class NicoBBS(object):
                     raise TwitterOverUpdateLimitError(reason["message"], reason["code"])
             raise TwitterStatusUpdateError()
 
-# nico nico
+# network utility
     def create_opener(self):
         # cookie
         cookiejar = cookielib.CookieJar()
@@ -182,71 +183,10 @@ class NicoBBS(object):
         # logging.debug("finished setting up cookie library")
 
         # login
-        opener.open(
-            LOGIN_URL, "mail=%s&password=%s" % (self.mail, self.password))
+        opener.open(LOGIN_URL, "mail=%s&password=%s" % (self.mail, self.password))
         logging.info("finished login")
 
         return opener
-
-# bbs
-    def get_bbs_internal_url(self, opener, community_id):
-        # get bbs
-        url = COMMUNITY_BBS_URL + community_id
-        # logging.debug(url)
-        reader = opener.open(url)
-        rawhtml = reader.read()
-        logging.debug("finished to get raw bbs.")
-
-        # print rawhtml
-        # use scraping by regular expression, instead of by beautifulsoup.
-        se = re.search('<iframe src="(.+?)"', rawhtml)
-        internal_url = se.group(1)
-
-        logging.debug("bbs internal url: " + internal_url)
-
-        return internal_url
-
-    def get_bbs_responses(self, opener, url, community):
-        # logging.debug(url)
-        reader = opener.open(url)
-        rawhtml = reader.read()
-        logging.debug("finished to get raw responses.")
-        # logging.debug(rawhtml)
-
-        soup = BeautifulSoup(rawhtml)
-        resheads = soup.findAll("dt", {"class": "reshead"})
-        resbodies = soup.findAll("dd", {"class": "resbody"})
-        responses = []
-        index = 0
-        for reshead in resheads:
-            # extract
-            number = reshead.find("a", {"class": "resnumhead"})["name"]
-            name = reshead.find("span", {"class": "name"}).text.strip()
-            # use "search", instead of "mathch". http://www.python.jp/doc/2.6/library/re.html#vs
-            date = "n/a"
-            se = re.search(DATE_REGEXP, reshead.text.strip())
-            if se:
-                date = se.group(1)
-            hash_id = re.search(RESID_REGEXP, reshead.text.strip()).group(1)
-            body = "".join([unicode(x) for x in resbodies[index]]).strip()
-            body = self.prefilter_message(body)
-            # logging.debug(u"[%s] [%s] [%s] [\n%s\n]".encode('utf_8') %
-            # (number, name, date, body))
-            index += 1
-
-            # append
-            response = {
-                "community": community,
-                "number": number,
-                "name": name,
-                "date": date,
-                "hash": hash_id,
-                "body": body,
-                "status": STATUS_UNPROCESSED
-            }
-            responses.append(response)
-
-        return responses
 
 # message utility
     def prefilter_message(self, message):
@@ -268,98 +208,17 @@ class NicoBBS(object):
         message = re.sub(u"\n\n", u"\n", message)
         return message
 
-# scraping utility
-    def read_community_page(self, opener, base_url, community):
-        url = base_url + community
-        logging.info("*** reading community page, target: " + url)
-
-        reader = opener.open(url)
-        rawhtml = reader.read()
-        # logging.debug(rawhtml)
-        logging.info("finished to read community page.")
-
-        return rawhtml
-
-    def find_community_name(self, soup):
-        return soup.find("h1", {"id": "community_name"}).text
-
-# reserved live
-    def get_community_reserved_live(self, rawhtml, community):
-        reserved_lives = []
+# misc utility
+    def find_community_name(self, rawhtml, community):
         soup = BeautifulSoup(rawhtml)
-        community_name = self.find_community_name(soup)
-        lives = soup.findAll("div", {"class": "item"})
 
-        for live in lives:
-            date = live.find("p", {"class": "date"})
-            title = live.find("p", {"class": "title"})
-            if title:
-                anchor = title.find("a")
-                link = anchor["href"]
-                se = re.search("/gate/", link)
-                if se:
-                    reserved_live = {"community": community,
-                                     "link": link,
-                                     "community_name": community_name,
-                                     "date": date.text,
-                                     "title": anchor.text,
-                                     "status": STATUS_UNPROCESSED}
-                    reserved_lives.append(reserved_live)
+        if self.is_channel(community):
+            return soup.find("h1", {"class": "channel_name"}).text
+        else:
+            return soup.find("h1", {"id": "community_name"}).text
 
-        return reserved_lives
-
-# news
-    def get_community_news(self, rawhtml, community):
-        news_items = []
-        soup = BeautifulSoup(rawhtml)
-        community_name = self.find_community_name(soup)
-
-        community_news_tag = soup.find(id="community_news")
-        if community_news_tag:
-            items = community_news_tag.select(".item")
-            for item in items:
-                title = item.select(".title")[0].get_text()
-                desc = item.select(".desc")[0].get_text()
-                desc = self.prefilter_message(desc)
-
-                date_and_name = item.select(".date")[0].get_text()
-                date = None
-                name = None
-                matched = re.match(ur'(.+)（(.+)）', date_and_name)
-                if matched:
-                    date = matched.group(1)
-                    name = matched.group(2)
-
-                news_item = {"community": community,
-                             "community_name": community_name,
-                             "title": title,
-                             "desc": desc,
-                             "date": date,
-                             "name": name,
-                             "status": STATUS_UNPROCESSED}
-                news_items.append(news_item)
-
-        return news_items
-
-# video
-    def get_community_video(self, rawhtml, community):
-        videos = []
-        soup = BeautifulSoup(rawhtml)
-        video_tag = soup.find(id="video")
-
-        if video_tag:
-            items = video_tag.select(".video")
-            for item in items:
-                title = item.get_text()
-                link = item["href"]
-
-                video = {"community": community,
-                         "title": title,
-                         "link": link,
-                         "status": STATUS_UNPROCESSED}
-                videos.append(video)
-
-        return videos
+    def is_channel(self, community_id):
+        return re.match(r'^co\d+$', community_id) is None
 
 # mongo
     # response
@@ -460,13 +319,74 @@ class NicoBBS(object):
     #     intnum = int(strnum)
     #     return str(intnum - ((intnum-1) % 30))
 
-    # bbs
-    def crawl_bbs_response(self, opener, community):
-        logging.info("*** crawling responses, community: %s" % community)
+# main, bbs
+    def read_response_page(self, opener, community):
+        url = COMMUNITY_BBS_URL + community
+        if self.is_channel(community):
+            url = CHANNEL_BASE_URL + community + '/bbs'
+        logging.info("*** reading community bbs page, target: " + url)
+        # logging.debug(url)
 
-        internal_url = self.get_bbs_internal_url(opener, community)
-        responses = self.get_bbs_responses(opener, internal_url, community)
-        logging.debug("scraped %s responses" % len(responses))
+        reader = opener.open(url)
+        rawhtml = reader.read()
+        logging.debug("finished to read front page.")
+
+        # print rawhtml
+        # use scraping by regular expression, instead of by beautifulsoup.
+        se = re.search('<iframe src="(http://dic\.nicovideo\.jp/.+?)"', rawhtml)
+        internal_url = se.group(1)
+        logging.debug("bbs internal url: " + internal_url)
+
+        reader = opener.open(internal_url)
+        rawhtml = reader.read()
+        logging.info("finished to read bbs page.")
+        # logging.debug(rawhtml)
+
+        return rawhtml
+
+    def parse_response(self, rawhtml, community):
+        logging.info("*** parsing responses, community: %s" % community)
+
+        soup = BeautifulSoup(rawhtml)
+        resheads = soup.findAll("dt", {"class": "reshead"})
+        resbodies = soup.findAll("dd", {"class": "resbody"})
+        responses = []
+        index = 0
+
+        for reshead in resheads:
+            # extract
+            number = reshead.find("a", {"class": "resnumhead"})["name"]
+            name = reshead.find("span", {"class": "name"}).text.strip()
+            # use "search", instead of "mathch". http://www.python.jp/doc/2.6/library/re.html#vs
+            date = "n/a"
+            se = re.search(DATE_REGEXP, reshead.text.strip())
+            if se:
+                date = se.group(1)
+            hash_id = re.search(RESID_REGEXP, reshead.text.strip()).group(1)
+            body = "".join([unicode(x) for x in resbodies[index]]).strip()
+            body = self.prefilter_message(body)
+            # logging.debug(u"[%s] [%s] [%s] [\n%s\n]".encode('utf_8') %
+            # (number, name, date, body))
+            index += 1
+
+            # append
+            response = {
+                "community": community,
+                "number": number,
+                "name": name,
+                "date": date,
+                "hash": hash_id,
+                "body": body,
+                "status": STATUS_UNPROCESSED
+            }
+            responses.append(response)
+
+        logging.info("scraped %s responses." % len(responses))
+
+        return responses
+
+    def store_response(self, responses, community):
+        logging.info("*** storing responses, community: %s" % community)
 
         skipped_responses = []
         registered_responses = []
@@ -481,9 +401,9 @@ class NicoBBS(object):
 
         logging.debug("skipped: %s" % skipped_responses)
         logging.debug("registered: %s" % registered_responses)
-        logging.info("completed to crawl responses")
+        logging.info("finished to store responses.")
 
-    def tweet_bbs_response(self, community, limit=0):
+    def tweet_response(self, community, limit=0):
         unprocessed_responses = self.get_responses_with_community_and_status(
             community, STATUS_UNPROCESSED)
         tweet_count = 0
@@ -542,13 +462,70 @@ class NicoBBS(object):
                              (limit, tweet_count))
                 break
 
-        logging.info("completed to process responses")
+        logging.info("finished to process responses.")
 
-    # reserved live
-    def crawl_reserved_live(self, rawhtml, community):
-        logging.info("*** crawling new reserved lives, community: %s" % community)
-        reserved_lives = self.get_community_reserved_live(rawhtml, community)
-        logging.debug("scraped %s reserved lives" % len(reserved_lives))
+# main, reserved live
+    def read_reserved_live_page(self, opener, community):
+        url = COMMUNITY_TOP_URL + community
+        if self.is_channel(community):
+            url = CHANNEL_BASE_URL + community + '/live'
+        logging.info("*** reading reserved live page, target: " + url)
+
+        reader = opener.open(url)
+        rawhtml = reader.read()
+        # logging.debug(rawhtml)
+        logging.info("finished to read reserved live page.")
+
+        return rawhtml
+
+    def parse_reserved_live(self, rawhtml, community):
+        logging.info("*** parsing reserved lives, community: %s" % community)
+
+        community_name = self.find_community_name(rawhtml, community)
+
+        reserved_lives = []
+        soup = BeautifulSoup(rawhtml)
+
+        if self.is_channel(community):
+            section = soup.find("section", {"class": "future"})
+            if section:
+                lives = section.find_all("div", {"class": "item_right"})
+                for live in lives:
+                    title = live.find("h6", {"class": "title"})
+                    link = title.find("a")["href"]
+                    date = live.find("p", {"class": "date"}).text
+                    reserved_live = {"community": community,
+                                     "community_name": community_name,
+                                     "title": title.text,
+                                     "link": link,
+                                     "date": date,
+                                     "status": STATUS_UNPROCESSED}
+                    reserved_lives.append(reserved_live)
+        else:
+            lives = soup.findAll("div", {"class": "item"})
+
+            for live in lives:
+                date = live.find("p", {"class": "date"})
+                title = live.find("p", {"class": "title"})
+                if title:
+                    anchor = title.find("a")
+                    link = anchor["href"]
+                    se = re.search("/gate/", link)
+                    if se:
+                        reserved_live = {"community": community,
+                                         "community_name": community_name,
+                                         "title": anchor.text,
+                                         "link": link,
+                                         "date": date.text,
+                                         "status": STATUS_UNPROCESSED}
+                        reserved_lives.append(reserved_live)
+
+        logging.info("scraped %s reserved lives." % len(reserved_lives))
+
+        return reserved_lives
+
+    def store_reserved_live(self, reserved_lives, community):
+        logging.info("*** storing reserved lives, community: %s" % community)
 
         for reserved_live in reserved_lives:
             if self.is_live_registered(reserved_live):
@@ -557,7 +534,7 @@ class NicoBBS(object):
                 self.register_live(reserved_live)
                 logging.debug("registered: %s" % reserved_live["link"])
 
-        logging.info("completed to crawl reserved lives")
+        logging.info("finished to store reserved lives.")
 
     def tweet_reserved_live(self, community, limit=0):
         unprocessed_lives = self.get_lives_with_community_and_status(
@@ -595,13 +572,48 @@ class NicoBBS(object):
                              (limit, tweet_count))
                 break
 
-        logging.info("completed to process reserved lives")
+        logging.info("finished to process reserved lives.")
 
-    # news
-    def crawl_news(self, rawhtml, community):
+# main, news
+    def parse_news(self, rawhtml, community):
+        logging.info("*** parsing community news, community: %s" % community)
+
+        community_name = self.find_community_name(rawhtml, community)
+
+        news_items = []
+        soup = BeautifulSoup(rawhtml)
+
+        community_news_tag = soup.find(id="community_news")
+        if community_news_tag:
+            items = community_news_tag.select(".item")
+            for item in items:
+                title = item.select(".title")[0].get_text()
+                desc = item.select(".desc")[0].get_text()
+                desc = self.prefilter_message(desc)
+
+                date_and_name = item.select(".date")[0].get_text()
+                date = None
+                name = None
+                matched = re.match(ur'(.+)（(.+)）', date_and_name)
+                if matched:
+                    date = matched.group(1)
+                    name = matched.group(2)
+
+                news_item = {"community": community,
+                             "community_name": community_name,
+                             "title": title,
+                             "desc": desc,
+                             "date": date,
+                             "name": name,
+                             "status": STATUS_UNPROCESSED}
+                news_items.append(news_item)
+
+        logging.info("scraped %s news." % len(news_items))
+
+        return news_items
+
+    def store_news(self, news_items, community):
         logging.info("*** crawling news, community: %s" % community)
-        news_items = self.get_community_news(rawhtml, community)
-        logging.debug("scraped %s news" % len(news_items))
 
         for news_item in news_items:
             if self.is_news_registered(news_item):
@@ -610,7 +622,7 @@ class NicoBBS(object):
                 self.register_news(news_item)
                 logging.debug("registered: %s" % news_item["date"])
 
-        logging.info("completed to crawl news")
+        logging.info("finished to crawl news")
 
     def tweet_news(self, community, limit=0):
         unprocessed_news = self.get_news_with_community_and_status(
@@ -654,13 +666,45 @@ class NicoBBS(object):
                              (limit, tweet_count))
                 break
 
-        logging.info("completed to process news")
+        logging.info("finished to process news")
 
-    # video
-    def crawl_video(self, rawhtml, community):
+# main, video
+    def read_video_page(self, opener, community):
+        url = COMMUNITY_VIDEO_URL + community
+        logging.info("*** reading video page, target: " + url)
+
+        reader = opener.open(url)
+        rawhtml = reader.read()
+        # logging.debug(rawhtml)
+        logging.info("finished to read video page.")
+
+        return rawhtml
+
+    def parse_video(self, rawhtml, community):
+        logging.info("*** parsing community video, community: %s" % community)
+
+        videos = []
+        soup = BeautifulSoup(rawhtml)
+        video_tag = soup.find(id="video")
+
+        if video_tag:
+            items = video_tag.select(".video")
+            for item in items:
+                title = item.get_text()
+                link = item["href"]
+
+                video = {"community": community,
+                         "title": title,
+                         "link": link,
+                         "status": STATUS_UNPROCESSED}
+                videos.append(video)
+
+        logging.info("scraped %s videos." % len(videos))
+
+        return videos
+
+    def store_video(self, videos, community):
         logging.info("*** crawling video, community: %s" % community)
-        videos = self.get_community_video(rawhtml, community)
-        logging.debug("scraped %s videos" % len(videos))
 
         for video in videos:
             if self.is_video_registered(video):
@@ -669,7 +713,7 @@ class NicoBBS(object):
                 self.register_video(video)
                 logging.debug("registered: %s" % video["link"])
 
-        logging.info("completed to crawl video")
+        logging.info("finished to crawl video")
 
     def tweet_video(self, community, limit=0):
         unprocessed_videos = self.get_video_with_community_and_status(
@@ -714,10 +758,60 @@ class NicoBBS(object):
                              (limit, tweet_count))
                 break
 
-        logging.info("completed to process video")
+        logging.info("finished to process video")
 
-# main
-    def start(self, limit=0):
+# kick
+    def kick_bbs(self, opener, community):
+        try:
+            rawhtml = self.read_response_page(opener, community)
+            responses = self.parse_response(rawhtml, community)
+            self.store_response(responses, community)
+            self.tweet_response(community)
+        except TwitterOverUpdateLimitError:
+            raise
+        except urllib2.HTTPError, error:
+            logging.error("*** caught http error when processing bbs, error: %s" % error)
+            if error.code == 403:
+                logging.info("bbs is closed?")
+        except Exception, error:
+            logging.error("*** caught error when processing bbs, error: %s" % error)
+
+    def kick_live_news(self, opener, community):
+        try:
+            rawhtml = self.read_reserved_live_page(opener, community)
+            reserved_lives = self.parse_reserved_live(rawhtml, community)
+            self.store_reserved_live(reserved_lives, community)
+            self.tweet_reserved_live(community)
+
+            if self.is_channel(community):
+                logging.info("channel news is not supported, so skip.")
+                return
+
+            # use rawhtml above
+            news_items = self.parse_news(rawhtml, community)
+            self.store_news(news_items, community)
+            self.tweet_news(community)
+        except TwitterOverUpdateLimitError:
+            raise
+        except Exception, error:
+            logging.error("*** caught error when processing live/news, error: %s" % error)
+
+    def kick_video(self, opener, community):
+        if self.is_channel(community):
+            logging.info("channel video is not supported, so skip.")
+            return
+
+        try:
+            rawhtml = self.read_video_page(opener, community)
+            videos = self.parse_video(rawhtml, community)
+            self.store_video(videos, community)
+            self.tweet_video(community)
+        except TwitterOverUpdateLimitError:
+            raise
+        except Exception, error:
+            logging.error("*** caught error when processing video, error: %s" % error)
+
+    def start(self):
         # inifinite loop
         while True:
             try:
@@ -729,44 +823,17 @@ class NicoBBS(object):
                 for community in self.target_communities:
                     logging.debug(LOG_SEPARATOR)
                     try:
-                        try:
-                            self.crawl_bbs_response(opener, community)
-                            self.tweet_bbs_response(community, limit)
-                        except TwitterOverUpdateLimitError:
-                            raise
-                        except urllib2.HTTPError, error:
-                            logging.error(
-                                "*** caught http error when processing bbs, error: %s" % error)
-                            if error.code == 403:
-                                logging.info("bbs is closed?")
-                        except Exception, error:
-                            logging.error(
-                                "*** caught error when processing bbs, error: %s" % error)
-
-                        try:
-                            rawhtml = self.read_community_page(opener, COMMUNITY_TOP_URL, community)
-                            self.crawl_reserved_live(rawhtml, community)
-                            self.tweet_reserved_live(community, limit)
-                            self.crawl_news(rawhtml, community)
-                            self.tweet_news(community, limit)
-
-                            rawhtml = self.read_community_page(opener, COMMUNITY_VIDEO_URL, community)
-                            self.crawl_video(rawhtml, community)
-                            self.tweet_video(community, limit)
-                        except TwitterOverUpdateLimitError:
-                            raise
-                        except Exception, error:
-                            logging.error(
-                                "*** caught error when processing live/video, error: %s" % error)
+                        self.kick_bbs(opener, community)
+                        self.kick_live_news(opener, community)
+                        self.kick_video(opener, community)
                     except TwitterOverUpdateLimitError:
                         logging.warning("status update over limit, so skip.")
+                    logging.debug("*** sleeping %d secs..." % COMMUNITY_INTERVAL)
+                    time.sleep(COMMUNITY_INTERVAL)
 
-            if limit:
-                break
-            else:
-                logging.debug(LOG_SEPARATOR)
-                logging.debug("*** sleeping %d secs..." % CRAWL_INTERVAL)
-                time.sleep(CRAWL_INTERVAL)
+            logging.debug(LOG_SEPARATOR)
+            logging.debug("*** sleeping %d secs..." % CRAWL_INTERVAL)
+            time.sleep(CRAWL_INTERVAL)
 
 
 if __name__ == "__main__":
