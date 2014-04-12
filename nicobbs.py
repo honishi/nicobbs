@@ -82,20 +82,25 @@ class NicoBBS(object):
         self.consumer_secret = {}
         self.access_key = {}
         self.access_secret = {}
+        self.response_number_prefix = {}
 
         for (community, consumer_key, consumer_secret, access_key,
-                access_secret) in self.get_community_config(config_file):
+                access_secret, response_number_prefix) in self.get_community_config(config_file):
             self.target_communities.append(community)
             self.consumer_key[self.target_communities[-1]] = consumer_key
             self.consumer_secret[self.target_communities[-1]] = consumer_secret
             self.access_key[self.target_communities[-1]] = access_key
             self.access_secret[self.target_communities[-1]] = access_secret
+            self.response_number_prefix[self.target_communities[-1]] = unicode(
+                response_number_prefix, 'utf-8')
 
             logging.debug("*** community: " + self.target_communities[-1])
             logging.debug("consumer_key: %s consumer_secret: xxxxxxxxxx" %
                           self.consumer_key[self.target_communities[-1]])
             logging.debug("access_key: %s access_secret: xxxxxxxxxx" %
                           self.access_key[self.target_communities[-1]])
+            logging.debug("*** response_number_prefix: " +
+                          self.response_number_prefix[self.target_communities[-1]])
 
         self.connection = pymongo.Connection()
         self.database = self.connection[database_name]
@@ -130,12 +135,19 @@ class NicoBBS(object):
             matched = re.match(r'community-(.+)', section)
             if matched:
                 community = matched.group(1)
+
                 consumer_key = config.get(section, "consumer_key")
                 consumer_secret = config.get(section, "consumer_secret")
                 access_key = config.get(section, "access_key")
                 access_secret = config.get(section, "access_secret")
-                result.append(
-                    (community, consumer_key, consumer_secret, access_key, access_secret))
+
+                response_number_prefix = ""
+                opt = "response_number_prefix"
+                if config.has_option(section, opt):
+                    response_number_prefix = config.get(section, opt)
+
+                result.append((community, consumer_key, consumer_secret, access_key,
+                               access_secret, response_number_prefix))
 
         return result
 
@@ -403,7 +415,7 @@ class NicoBBS(object):
         logging.debug("registered: %s" % registered_responses)
         logging.info("finished to store responses.")
 
-    def tweet_response(self, community, limit=0):
+    def tweet_response(self, community, response_number_prefix="", limit=0):
         unprocessed_responses = self.get_responses_with_community_and_status(
             community, STATUS_UNPROCESSED)
         tweet_count = 0
@@ -414,7 +426,7 @@ class NicoBBS(object):
         for response in unprocessed_responses:
             logging.debug("processing response #%s" % response["number"])
 
-            response_number = response["number"]
+            response_number = response_number_prefix + response["number"]
             response_name = response["name"]
             response_body = response["body"]
 
@@ -761,12 +773,12 @@ class NicoBBS(object):
         logging.info("finished to process video")
 
 # kick
-    def kick_bbs(self, opener, community):
+    def kick_bbs(self, opener, community, response_number_prefix=""):
         try:
             rawhtml = self.read_response_page(opener, community)
             responses = self.parse_response(rawhtml, community)
             self.store_response(responses, community)
-            self.tweet_response(community)
+            self.tweet_response(community, response_number_prefix)
         except TwitterOverUpdateLimitError:
             raise
         except urllib2.HTTPError, error:
@@ -823,7 +835,7 @@ class NicoBBS(object):
                 for community in self.target_communities:
                     logging.debug(LOG_SEPARATOR)
                     try:
-                        self.kick_bbs(opener, community)
+                        self.kick_bbs(opener, community, self.response_number_prefix[community])
                         self.kick_live_news(opener, community)
                         self.kick_video(opener, community)
                     except TwitterOverUpdateLimitError:

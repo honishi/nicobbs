@@ -10,12 +10,14 @@ consumer_key = xxx
 consumer_secret = xxx
 access_key = xxx
 access_secret = xxx
+# response_number_prefix = xxx
 
 [community-co67890]
 consumer_key = xxx
 consumer_secret = xxx
 access_key = xxx
 access_secret = xxx
+# response_number_prefix = xxx
 
 [loggers]
 keys=root

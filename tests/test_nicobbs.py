@@ -90,7 +90,7 @@ def test_response(bbs):
     assert 0 < len(response['status'])
 
     bbs.store_response(responses, community)
-    # bbs.tweet_response(community, 2)
+    # bbs.tweet_response(community, limit=2)
 
 
 #def test_read_live(bbs):
@@ -138,7 +138,7 @@ def test_live_user(bbs):
     assert 0 < len(live['status'])
 
     bbs.store_reserved_live(lives, community)
-    # bbs.tweet_reserved_live(community, 2)
+    # bbs.tweet_reserved_live(community, limit=2)
 
 
 def test_live_channel(bbs):
@@ -158,7 +158,7 @@ def test_live_channel(bbs):
     assert 0 < len(live['status'])
 
     bbs.store_reserved_live(lives, community)
-    # bbs.tweet_reserved_live(community, 2)
+    # bbs.tweet_reserved_live(community, limit=2)
 
 
 def test_news(bbs):
@@ -179,7 +179,7 @@ def test_news(bbs):
     assert 0 < len(news['status'])
 
     bbs.store_news(news_items, community)
-    # bbs.tweet_news(community, 2)
+    # bbs.tweet_news(community, limit=2)
 
 
 def test_video(bbs):
@@ -197,7 +197,7 @@ def test_video(bbs):
     assert 0 < len(video['status'])
 
     bbs.store_video(videos, community)
-    # bbs.tweet_video(community, 2)
+    # bbs.tweet_video(community, limit=2)
 
 
 #def test_tweet(bbs):
