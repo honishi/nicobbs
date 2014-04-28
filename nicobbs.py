@@ -739,9 +739,9 @@ class NicoBBS(object):
             logging.debug("processing video %s" % video["link"])
 
             statuses = nicoutil.create_twitter_statuses(
-                u"【コミュニティ動画投稿】",
+                u"【コミュ動画投稿】",
                 u'[続き] ',
-                u"動画「%s」が投稿されました。%s" % (video["title"], video["link"]),
+                u"「%s」が投稿されました。%s" % (video["title"], video["link"]),
                 u' [続く]')
 
             for status in statuses:

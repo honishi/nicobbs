@@ -25,6 +25,13 @@ sudo apt-get install libxml2-dev libxslt-dev
 pip install -r requirements.txt
 ````
 
+````
+cp nicobbs.config.sample nicobbs.config
+vi nicobbs.config
+cp nicobbs.env.sample nicobbs.env
+vi nicobbs.env
+````
+
 configure mongo
 --
 run the following script to create indexes that are needed for proper query execution plan.
