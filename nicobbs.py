@@ -82,15 +82,17 @@ class NicoBBS(object):
         self.consumer_secret = {}
         self.access_key = {}
         self.access_secret = {}
+        self.skip_bbs = {}
         self.response_number_prefix = {}
 
-        for (community, consumer_key, consumer_secret, access_key,
-                access_secret, response_number_prefix) in self.get_community_config(config_file):
+        for (community, consumer_key, consumer_secret, access_key, access_secret,
+                skip_bbs, response_number_prefix) in self.get_community_config(config_file):
             self.target_communities.append(community)
             self.consumer_key[self.target_communities[-1]] = consumer_key
             self.consumer_secret[self.target_communities[-1]] = consumer_secret
             self.access_key[self.target_communities[-1]] = access_key
             self.access_secret[self.target_communities[-1]] = access_secret
+            self.skip_bbs[self.target_communities[-1]] = skip_bbs
             self.response_number_prefix[self.target_communities[-1]] = unicode(
                 response_number_prefix, 'utf-8')
 
@@ -99,6 +101,8 @@ class NicoBBS(object):
                           self.consumer_key[self.target_communities[-1]])
             logging.debug("access_key: %s access_secret: xxxxxxxxxx" %
                           self.access_key[self.target_communities[-1]])
+            logging.debug("*** skip_bbs: %d" %
+                          self.skip_bbs[self.target_communities[-1]])
             logging.debug("*** response_number_prefix: " +
                           self.response_number_prefix[self.target_communities[-1]])
 
@@ -141,13 +145,18 @@ class NicoBBS(object):
                 access_key = config.get(section, "access_key")
                 access_secret = config.get(section, "access_secret")
 
+                skip_bbs = False
+                skip_bbs_option = "skip_bbs"
+                if config.has_option(section, skip_bbs_option):
+                    skip_bbs = config.getboolean(section, skip_bbs_option)
+
                 response_number_prefix = ""
                 opt = "response_number_prefix"
                 if config.has_option(section, opt):
                     response_number_prefix = config.get(section, opt)
 
                 result.append((community, consumer_key, consumer_secret, access_key,
-                               access_secret, response_number_prefix))
+                               access_secret, skip_bbs, response_number_prefix))
 
         return result
 
@@ -834,8 +843,13 @@ class NicoBBS(object):
             else:
                 for community in self.target_communities:
                     logging.debug(LOG_SEPARATOR)
+                    logging.info("*** " + community)
                     try:
-                        self.kick_bbs(opener, community, self.response_number_prefix[community])
+                        if self.skip_bbs[community]:
+                            logging.info("skipped bbs.")
+                        else:
+                            self.kick_bbs(
+                                opener, community, self.response_number_prefix[community])
                         self.kick_live_news(opener, community)
                         self.kick_video(opener, community)
                     except TwitterOverUpdateLimitError:
