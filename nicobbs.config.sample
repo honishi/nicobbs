@@ -12,6 +12,7 @@ access_key = xxx
 access_secret = xxx
 # skip_bbs = true
 # response_number_prefix = xxx
+# mark_hashes = hash1,hash2
 
 [community-co67890]
 consumer_key = xxx
@@ -20,6 +21,7 @@ access_key = xxx
 access_secret = xxx
 # skip_bbs = true
 # response_number_prefix = xxx
+# mark_hashes = hash1,hash2
 
 [loggers]
 keys=root

@@ -84,27 +84,25 @@ class NicoBBS(object):
         self.access_secret = {}
         self.skip_bbs = {}
         self.response_number_prefix = {}
+        self.mark_hashes = {}
 
-        for (community, consumer_key, consumer_secret, access_key, access_secret,
-                skip_bbs, response_number_prefix) in self.get_community_config(config_file):
+        for (community, consumer_key, consumer_secret, access_key, access_secret, skip_bbs,
+                response_number_prefix, mark_hashes) in self.get_community_config(config_file):
             self.target_communities.append(community)
-            self.consumer_key[self.target_communities[-1]] = consumer_key
-            self.consumer_secret[self.target_communities[-1]] = consumer_secret
-            self.access_key[self.target_communities[-1]] = access_key
-            self.access_secret[self.target_communities[-1]] = access_secret
-            self.skip_bbs[self.target_communities[-1]] = skip_bbs
-            self.response_number_prefix[self.target_communities[-1]] = unicode(
-                response_number_prefix, 'utf-8')
+            self.consumer_key[community] = consumer_key
+            self.consumer_secret[community] = consumer_secret
+            self.access_key[community] = access_key
+            self.access_secret[community] = access_secret
+            self.skip_bbs[community] = skip_bbs
+            self.response_number_prefix[community] = unicode(response_number_prefix, 'utf-8')
+            self.mark_hashes[community] = mark_hashes
 
-            logging.debug("*** community: " + self.target_communities[-1])
-            logging.debug("consumer_key: %s consumer_secret: xxxxxxxxxx" %
-                          self.consumer_key[self.target_communities[-1]])
-            logging.debug("access_key: %s access_secret: xxxxxxxxxx" %
-                          self.access_key[self.target_communities[-1]])
-            logging.debug("*** skip_bbs: %d" %
-                          self.skip_bbs[self.target_communities[-1]])
-            logging.debug("*** response_number_prefix: " +
-                          self.response_number_prefix[self.target_communities[-1]])
+            logging.debug("*** community: " + community)
+            logging.debug("consumer_key: %s secret: xxxxx" % self.consumer_key[community])
+            logging.debug("access_key: %s secret: xxxxx" % self.access_key[community])
+            logging.debug("skip_bbs: %d" % self.skip_bbs[community])
+            logging.debug("response_number_prefix: " + self.response_number_prefix[community])
+            logging.debug("mark_hashes: %s" % self.mark_hashes[community])
 
         self.connection = pymongo.Connection()
         self.database = self.connection[database_name]
@@ -151,12 +149,17 @@ class NicoBBS(object):
                     skip_bbs = config.getboolean(section, skip_bbs_option)
 
                 response_number_prefix = ""
-                opt = "response_number_prefix"
-                if config.has_option(section, opt):
-                    response_number_prefix = config.get(section, opt)
+                response_number_prefix_opt = "response_number_prefix"
+                if config.has_option(section, response_number_prefix_opt):
+                    response_number_prefix = config.get(section, response_number_prefix_opt)
+
+                mark_hashes = []
+                mark_hashes_option = "mark_hashes"
+                if config.has_option(section, mark_hashes_option):
+                    mark_hashes = config.get(section, mark_hashes_option).split(',')
 
                 result.append((community, consumer_key, consumer_secret, access_key,
-                               access_secret, skip_bbs, response_number_prefix))
+                               access_secret, skip_bbs, response_number_prefix, mark_hashes))
 
         return result
 
@@ -390,6 +393,9 @@ class NicoBBS(object):
             # (number, name, date, body))
             index += 1
 
+            # if not self.is_valid_response(community, number):
+            #     continue
+
             # append
             response = {
                 "community": community,
@@ -405,6 +411,25 @@ class NicoBBS(object):
         logging.info("scraped %s responses." % len(responses))
 
         return responses
+
+    # quick workaround for broken bbs case
+    def is_valid_response(self, community, number):
+        number = int(number)
+
+        # q, mokushiroku, yossan, noda
+        has_valid_response_number = (
+            (community == "co1827022" and 88680 < number and number < 95000) or
+            (community == "gurikan" and 1130 < number and number < 2000) or
+            (community == "co2427181" and 3300 < number and number < 5000) or
+            (community == "co1354854" and 1600 < number and number < 3000))
+
+        if has_valid_response_number:
+            # logging.debug("response is valid.")
+            pass
+        else:
+            logging.warning("response is NOT valid, should skip. %s,%s" % (community, number))
+
+        return has_valid_response_number
 
     def store_response(self, responses, community):
         logging.info("*** storing responses, community: %s" % community)
@@ -424,7 +449,7 @@ class NicoBBS(object):
         logging.debug("registered: %s" % registered_responses)
         logging.info("finished to store responses.")
 
-    def tweet_response(self, community, response_number_prefix="", limit=0):
+    def tweet_response(self, community, response_number_prefix="", mark_hashes=[], limit=0):
         unprocessed_responses = self.get_responses_with_community_and_status(
             community, STATUS_UNPROCESSED)
         tweet_count = 0
@@ -438,6 +463,7 @@ class NicoBBS(object):
             response_number = response_number_prefix + response["number"]
             response_name = response["name"]
             response_body = response["body"]
+            response_hash = response["hash"]
 
             if (self.contains_ng_words(response_body) or
                     self.contains_too_many_link(response_body)):
@@ -448,9 +474,14 @@ class NicoBBS(object):
 
             # create statuses
             response_body = self.postfilter_message(response_body)
+
+            header = u'(' + response_number + u': ' + response_name + u')'
+            if response_hash in mark_hashes:
+                header += u' ★'
+            header += u'\n'
+
             statuses = nicoutil.create_twitter_statuses(
-                u'(' + response_number + u': ' + response_name + u')\n',
-                u'[続き] ', response_body, u' [続く]')
+                header, u'[続き] ', response_body, u' [続く]')
 
             for status in statuses:
                 if 0 < tweet_count:
@@ -782,12 +813,12 @@ class NicoBBS(object):
         logging.info("finished to process video")
 
 # kick
-    def kick_bbs(self, opener, community, response_number_prefix=""):
+    def kick_bbs(self, opener, community, response_number_prefix="", mark_hashes=[]):
         try:
             rawhtml = self.read_response_page(opener, community)
             responses = self.parse_response(rawhtml, community)
             self.store_response(responses, community)
-            self.tweet_response(community, response_number_prefix)
+            self.tweet_response(community, response_number_prefix, mark_hashes)
         except TwitterOverUpdateLimitError:
             raise
         except urllib2.HTTPError, error:
@@ -848,8 +879,10 @@ class NicoBBS(object):
                         if self.skip_bbs[community]:
                             logging.info("skipped bbs.")
                         else:
-                            self.kick_bbs(
-                                opener, community, self.response_number_prefix[community])
+                            self.kick_bbs(opener,
+                                          community,
+                                          self.response_number_prefix[community],
+                                          self.mark_hashes[community])
                         self.kick_live_news(opener, community)
                         self.kick_video(opener, community)
                     except TwitterOverUpdateLimitError:
