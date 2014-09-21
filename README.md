@@ -55,7 +55,7 @@ see `nicobbs.sh` inside for the details of monitoring.
 	# monitoring nicoalert
 	* * * * * /path/to/nicobbs/nicobbs.sh monitor >> /path/to/nicobbs/log/monitor.log 2>&1
 
-snippets for me
+memo
 --
 copy collections to another database.
 ````
@@ -66,6 +66,16 @@ db.news.find().forEach(function(d){ db.getSiblingDB('to_database_name')['news'].
 db.video.find().forEach(function(d){ db.getSiblingDB('to_database_name')['video'].insert(d); });
 ````
 - http://stackoverflow.com/a/11554924
+
+launch mongodb installed through `brew install mongo`.
+````
+To have launchd start mongodb at login:
+    ln -sfv /usr/local/opt/mongodb/*.plist ~/Library/LaunchAgents
+Then to load mongodb now:
+    launchctl load ~/Library/LaunchAgents/homebrew.mxcl.mongodb.plist
+Or, if you don't want/need launchctl, you can just run:
+    mongod --config /usr/local/etc/mongod.conf
+````
 
 license
 --

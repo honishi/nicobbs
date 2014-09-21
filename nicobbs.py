@@ -94,7 +94,7 @@ class NicoBBS(object):
             self.access_key[community] = access_key
             self.access_secret[community] = access_secret
             self.skip_bbs[community] = skip_bbs
-            self.response_number_prefix[community] = unicode(response_number_prefix, 'utf-8')
+            self.response_number_prefix[community] = response_number_prefix
             self.mark_hashes[community] = mark_hashes
 
             logging.debug("*** community: " + community)
@@ -119,7 +119,7 @@ class NicoBBS(object):
         mail = config.get(section, "mail")
         password = config.get(section, "password")
         database_name = config.get(section, "database_name")
-        ng_words = config.get(section, "ng_words")
+        ng_words = unicode(config.get(section, "ng_words"), 'utf-8')
         if ng_words == '':
             ng_words = []
         else:
@@ -152,6 +152,7 @@ class NicoBBS(object):
                 response_number_prefix_opt = "response_number_prefix"
                 if config.has_option(section, response_number_prefix_opt):
                     response_number_prefix = config.get(section, response_number_prefix_opt)
+                response_number_prefix = unicode(response_number_prefix, 'utf-8')
 
                 mark_hashes = []
                 mark_hashes_option = "mark_hashes"
