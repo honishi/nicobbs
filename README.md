@@ -37,7 +37,7 @@ configure mongo
 run the following script to create indexes that are needed for proper query execution plan.
 
 ````
-mongo your_database_name ./credb.js
+mongo your_database_name ./database/credb.js
 ````
 
 kick

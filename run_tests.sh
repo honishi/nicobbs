@@ -12,11 +12,11 @@ do
   fi
 done
 
-mongo ${DATABASE_NAME} ./credb.js --verbose
+mongo ${DATABASE_NAME} ./database/credb.js --verbose
 
 # py.test -s \
 py.test \
   --pep8 \
   --cov-report term --cov-report html \
-  --cov nicobbs.py --cov nicoutil.py \
+  --cov nicobbs.py --cov ./nicoutil \
   tests
