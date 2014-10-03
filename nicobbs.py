@@ -83,10 +83,14 @@ class NicoBBS(object):
         self.access_key = {}
         self.access_secret = {}
         self.skip_bbs = {}
+        self.skip_live = {}
+        self.skip_news = {}
+        self.skip_video = {}
         self.response_number_prefix = {}
         self.mark_hashes = {}
 
-        for (community, consumer_key, consumer_secret, access_key, access_secret, skip_bbs,
+        for (community, consumer_key, consumer_secret, access_key, access_secret,
+                skip_bbs, skip_live, skip_news, skip_video,
                 response_number_prefix, mark_hashes) in self.get_community_config(config_file):
             self.target_communities.append(community)
             self.consumer_key[community] = consumer_key
@@ -94,6 +98,9 @@ class NicoBBS(object):
             self.access_key[community] = access_key
             self.access_secret[community] = access_secret
             self.skip_bbs[community] = skip_bbs
+            self.skip_live[community] = skip_live
+            self.skip_news[community] = skip_news
+            self.skip_video[community] = skip_video
             self.response_number_prefix[community] = response_number_prefix
             self.mark_hashes[community] = mark_hashes
 
@@ -101,6 +108,9 @@ class NicoBBS(object):
             logging.debug("consumer_key: %s secret: xxxxx" % self.consumer_key[community])
             logging.debug("access_key: %s secret: xxxxx" % self.access_key[community])
             logging.debug("skip_bbs: %d" % self.skip_bbs[community])
+            logging.debug("skip_live: %d" % self.skip_live[community])
+            logging.debug("skip_news: %d" % self.skip_news[community])
+            logging.debug("skip_video: %d" % self.skip_video[community])
             logging.debug("response_number_prefix: " + self.response_number_prefix[community])
             logging.debug("mark_hashes: %s" % self.mark_hashes[community])
 
@@ -130,7 +140,15 @@ class NicoBBS(object):
     def get_community_config(self, config_file):
         result = []
 
-        config = ConfigParser.ConfigParser()
+        defaults = {
+            "skip_bbs": "false",
+            "skip_live": "false",
+            "skip_news": "false",
+            "skip_video": "false",
+            "response_number_prefix": "",
+            "mark_hashes": None}
+
+        config = ConfigParser.ConfigParser(defaults)
         config.read(config_file)
 
         for section in config.sections():
@@ -143,24 +161,23 @@ class NicoBBS(object):
                 access_key = config.get(section, "access_key")
                 access_secret = config.get(section, "access_secret")
 
-                skip_bbs = False
-                skip_bbs_option = "skip_bbs"
-                if config.has_option(section, skip_bbs_option):
-                    skip_bbs = config.getboolean(section, skip_bbs_option)
+                skip_bbs = config.getboolean(section, "skip_bbs")
+                skip_live = config.getboolean(section, "skip_live")
+                skip_news = config.getboolean(section, "skip_news")
+                skip_video = config.getboolean(section, "skip_video")
 
-                response_number_prefix = ""
-                response_number_prefix_opt = "response_number_prefix"
-                if config.has_option(section, response_number_prefix_opt):
-                    response_number_prefix = config.get(section, response_number_prefix_opt)
-                response_number_prefix = unicode(response_number_prefix, 'utf-8')
+                response_number_prefix = unicode(
+                    config.get(section, "response_number_prefix"), 'utf-8')
 
-                mark_hashes = []
-                mark_hashes_option = "mark_hashes"
-                if config.has_option(section, mark_hashes_option):
-                    mark_hashes = config.get(section, mark_hashes_option).split(',')
+                mark_hashes = config.get(section, "mark_hashes")
+                if mark_hashes is None:
+                    mark_hashes = []
+                else:
+                    mark_hashes = mark_hashes.split(',')
 
                 result.append((community, consumer_key, consumer_secret, access_key,
-                               access_secret, skip_bbs, response_number_prefix, mark_hashes))
+                               access_secret, skip_bbs, skip_live, skip_news, skip_video,
+                               response_number_prefix, mark_hashes))
 
         return result
 
@@ -832,18 +849,25 @@ class NicoBBS(object):
     def kick_live_news(self, opener, community):
         try:
             rawhtml = self.read_reserved_live_page(opener, community)
-            reserved_lives = self.parse_reserved_live(rawhtml, community)
-            self.store_reserved_live(reserved_lives, community)
-            self.tweet_reserved_live(community)
 
-            if self.is_channel(community):
-                logging.info("channel news is not supported, so skip.")
-                return
+            if self.skip_live[community]:
+                logging.info("skipped live.")
+            else:
+                reserved_lives = self.parse_reserved_live(rawhtml, community)
+                self.store_reserved_live(reserved_lives, community)
+                self.tweet_reserved_live(community)
 
-            # use rawhtml above
-            news_items = self.parse_news(rawhtml, community)
-            self.store_news(news_items, community)
-            self.tweet_news(community)
+            if self.skip_news[community]:
+                logging.info("skipped news.")
+            else:
+                if self.is_channel(community):
+                    logging.info("channel news is not supported, so skip.")
+                    return
+
+                # use rawhtml above
+                news_items = self.parse_news(rawhtml, community)
+                self.store_news(news_items, community)
+                self.tweet_news(community)
         except TwitterOverUpdateLimitError:
             raise
         except Exception, error:
@@ -884,8 +908,16 @@ class NicoBBS(object):
                                           community,
                                           self.response_number_prefix[community],
                                           self.mark_hashes[community])
-                        self.kick_live_news(opener, community)
-                        self.kick_video(opener, community)
+
+                        if self.skip_live[community] and self.skip_news[community]:
+                            logging.info("skipped live and news.")
+                        else:
+                            self.kick_live_news(opener, community)
+
+                        if self.skip_video[community]:
+                            logging.info("skipped video.")
+                        else:
+                            self.kick_video(opener, community)
                     except TwitterOverUpdateLimitError:
                         logging.warning("status update over limit, so skip.")
                     logging.debug("*** sleeping %d secs..." % COMMUNITY_INTERVAL)

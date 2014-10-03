@@ -11,6 +11,9 @@ consumer_secret = xxx
 access_key = xxx
 access_secret = xxx
 # skip_bbs = true
+# skip_live = true
+# skip_news = true
+# skip_video = true
 # response_number_prefix = xxx
 # mark_hashes = hash1,hash2
 
@@ -20,6 +23,9 @@ consumer_secret = xxx
 access_key = xxx
 access_secret = xxx
 # skip_bbs = true
+# skip_live = true
+# skip_news = true
+# skip_video = true
 # response_number_prefix = xxx
 # mark_hashes = hash1,hash2
 
