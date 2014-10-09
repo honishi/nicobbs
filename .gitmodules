@@ -1,3 +1,0 @@
-[submodule "external/tweepy"]
-	path = external/tweepy
-	url = https://github.com/tweepy/tweepy
