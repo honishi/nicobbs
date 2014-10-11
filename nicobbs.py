@@ -16,15 +16,21 @@ from bs4 import BeautifulSoup
 import pymongo
 import tweepy
 
+NICOBBS_CONFIG = os.path.dirname(os.path.abspath(__file__)) + '/nicobbs.config'
+NICOBBS_CONFIG_SAMPLE = NICOBBS_CONFIG + '.sample'
+
 LOGIN_URL = 'https://secure.nicovideo.jp/secure/login'
 COMMUNITY_TOP_URL = 'http://com.nicovideo.jp/community/'
 COMMUNITY_VIDEO_URL = 'http://com.nicovideo.jp/video/'
 COMMUNITY_BBS_URL = 'http://com.nicovideo.jp/bbs/'
 CHANNEL_BASE_URL = 'http://ch.nicovideo.jp/'
+
 DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
 RESID_REGEXP = 'ID: (.+)'
-NICOBBS_CONFIG = os.path.dirname(os.path.abspath(__file__)) + '/nicobbs.config'
-NICOBBS_CONFIG_SAMPLE = NICOBBS_CONFIG + '.sample'
+
+SKIP_LINK_REGEXPS = ["sm\d{5,}", "co\d{5,}", "http://.+\.2ch\.net/"]
+MAX_SKIP_LINKS_IN_RESPONSE = 5
+
 CRAWL_INTERVAL = 30
 COMMUNITY_INTERVAL = 5
 TWEET_INTERVAL = 3
@@ -349,11 +355,10 @@ class NicoBBS(object):
         return False
 
     def contains_too_many_link(self, message):
-        videos = re.findall("sm\d{5,}", message)
-        communities = re.findall("co\d{5,}", message)
-        limit = 5
-        if limit < len(videos) or limit < len(communities):
-            return True
+        for regexp in SKIP_LINK_REGEXPS:
+            matches = re.findall(regexp, message)
+            if MAX_SKIP_LINKS_IN_RESPONSE < len(matches):
+                return True
         return False
 
 # main
