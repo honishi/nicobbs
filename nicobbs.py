@@ -28,8 +28,10 @@ CHANNEL_BASE_URL = 'http://ch.nicovideo.jp/'
 DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
 RESID_REGEXP = 'ID: (.+)'
 
-SKIP_LINK_REGEXPS = ["sm\d{5,}", "co\d{5,}", "http://.+\.2ch\.net/"]
+SKIP_LINK_REGEXPS = ["sm\d{5,}", "co\d{5,}", "https?://[\w/:%#\$&\?\(\)~\.=\+\-]+"]
 MAX_SKIP_LINKS_IN_RESPONSE = 5
+
+DELETED_MESSAGE = u"削除しました"
 
 CRAWL_INTERVAL = 30
 COMMUNITY_INTERVAL = 5
@@ -41,6 +43,8 @@ STATUS_UNPROCESSED = "UNPROCESSED"
 STATUS_SPAM = "SPAM"
 # duplicate status updates
 STATUS_DUPLICATE = "DUPLICATE"
+# already deleted responses
+STATUS_DELETED = "DELETED"
 # responses/lives that are failed to be posted to twitter. currently not used
 STATUS_FAILED = "FAILED"
 # reponses/lives that are successfully posted to twitter
@@ -361,6 +365,9 @@ class NicoBBS(object):
                 return True
         return False
 
+    def is_deleted_message(self, message):
+        return message == DELETED_MESSAGE
+
 # main
     # def page_number(self, strnum):
     #     intnum = int(strnum)
@@ -493,6 +500,11 @@ class NicoBBS(object):
                 logging.debug(
                     "response contains ng word/too many video, so skip: [%s]" % response_body)
                 self.update_response_status(response, STATUS_SPAM)
+                continue
+
+            if self.is_deleted_message(response_body):
+                logging.debug("response is deleted, so skip: [%s]" % response_body)
+                self.update_response_status(response, STATUS_DELETED)
                 continue
 
             # create statuses
