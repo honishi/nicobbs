@@ -76,6 +76,15 @@ Or, if you don't want/need launchctl, you can just run:
     mongod --config /usr/local/etc/mongod.conf
 ````
 
+force update tweet status from unprocessed to processed
+--
+````
+db.response.find({"status": "UNPROCESSED"});
+# update status w/ options; upsert: false, multi: true
+db.response.update({"status": "UNPROCESSED"}, {$set: {"status": "COMPLETED"}}, false, true);
+db.response.find({"status": "UNPROCESSED"});
+````
+
 license
 --
 copyright &copy; 2012- honishi, hiroyuki onishi.

@@ -43,6 +43,8 @@ STATUS_UNPROCESSED = "UNPROCESSED"
 STATUS_SPAM = "SPAM"
 # duplicate status updates
 STATUS_DUPLICATE = "DUPLICATE"
+# over 140 characters
+STATUS_OVER_CHARS = "OVER_CHARS"
 # already deleted responses
 STATUS_DELETED = "DELETED"
 # responses/lives that are failed to be posted to twitter. currently not used
@@ -64,6 +66,10 @@ class TwitterStatusUpdateError(Exception):
 
 
 class TwitterDuplicateStatusUpdateError(TwitterStatusUpdateError):
+    pass
+
+
+class TwitterOverCharactersStatusUpdateError(TwitterStatusUpdateError):
     pass
 
 
@@ -221,11 +227,47 @@ class NicoBBS(object):
                     raise TwitterDuplicateStatusUpdateError(reason["message"], reason["code"])
                 elif reason["code"] == 186:
                     # 'Status is over 140 characters.'
-                    raise TwitterStatusUpdateError(reason["message"], reason["code"])
+                    raise TwitterOverCharactersStatusUpdateError(reason["message"], reason["code"])
                 elif reason["code"] == 185:
                     # 'User is over daily status update limit.'
                     raise TwitterOverUpdateLimitError(reason["message"], reason["code"])
             raise TwitterStatusUpdateError()
+
+    def tweet_statuses(self, community, statuses, update_handler, update_target, tweet_count=0):
+        for status in statuses:
+            if 0 < tweet_count:
+                logging.debug("sleeping %d secs before next tweet..." % TWEET_INTERVAL)
+                time.sleep(TWEET_INTERVAL)
+
+            try:
+                self.update_twitter_status(community, status)
+            except TwitterDuplicateStatusUpdateError, error:
+                # status is already posted to twitter. so response status should be
+                # changed from 'unprocessed' to other, in order to avoid reprocessing
+                logging.error("twitter status update error, duplicate: %s" % error)
+                update_handler(update_target, STATUS_DUPLICATE)
+                break
+            except TwitterOverUpdateLimitError, error:
+                # quit this status update sequence
+                logging.error("twitter status update error, over limit: %s" % error)
+                raise
+            except TwitterOverCharactersStatusUpdateError, error:
+                # status has over 140 characters. this is possible nicobbs bug.
+                logging.error("twitter status update error, over characters: %s" % error)
+                update_handler(update_target, STATUS_OVER_CHARS)
+                break
+            except TwitterStatusUpdateError, error:
+                # twitter error case including api limit
+                # response status should not be changed here for future retrying
+                logging.error("twitter status update error, unknown: %s" % error)
+                break
+            else:
+                update_handler(update_target, STATUS_COMPLETED)
+                logging.info("status updated: [%s]" % status)
+
+            tweet_count += 1
+
+        return tweet_count
 
 # network utility
     def create_opener(self):
@@ -518,31 +560,8 @@ class NicoBBS(object):
             statuses = nicoutil.create_twitter_statuses(
                 header, u'[続き] ', response_body, u' [続く]')
 
-            for status in statuses:
-                if 0 < tweet_count:
-                    logging.debug("sleeping %d secs before next tweet..." % TWEET_INTERVAL)
-                    time.sleep(TWEET_INTERVAL)
-                try:
-                    self.update_twitter_status(community, status)
-                except TwitterDuplicateStatusUpdateError, error:
-                    # status is already posted to twitter. so response status should be
-                    # changed from 'unprocessed' to other, in order to avoid reprocessing
-                    logging.error("twitter status update error, duplicate: %s" % error)
-                    self.update_response_status(response, STATUS_DUPLICATE)
-                    break
-                except TwitterOverUpdateLimitError, error:
-                    # quit this status update sequence
-                    logging.error("twitter status update error, over limit: %s" % error)
-                    raise
-                except TwitterStatusUpdateError, error:
-                    # twitter error case including api limit
-                    # response status should not be changed here for future retrying
-                    logging.error("twitter status update error, unknown: %s" % error)
-                    break
-                else:
-                    self.update_response_status(response, STATUS_COMPLETED)
-                    logging.info("status updated: [%s]" % status)
-                tweet_count += 1
+            tweet_count = self.tweet_statuses(
+                community, statuses, self.update_response_status, response, tweet_count)
 
             if limit and limit <= tweet_count:
                 logging.info("breaking tweet processing, limit: %d tweet_count: %d" %
@@ -637,22 +656,9 @@ class NicoBBS(object):
             status = (u"【放送予約】「" + live["community_name"] + u"」で生放送「" +
                       live["title"] + u"」が予約されました。" + live["date"] + u" " +
                       live["link"])
-            try:
-                self.update_twitter_status(community, status)
-            except TwitterDuplicateStatusUpdateError, error:
-                logging.error("twitter status update error, duplicate: %s", error)
-                self.update_live_status(live, STATUS_DUPLICATE)
-                break
-            except TwitterOverUpdateLimitError, error:
-                logging.error("twitter status update error, over limit: %s" % error)
-                raise
-            except TwitterStatusUpdateError, error:
-                logging.error("twitter status update error, unknown")
-                break
-            else:
-                self.update_live_status(live, STATUS_COMPLETED)
-                logging.info("status updated: [%s]" % status)
-            tweet_count += 1
+
+            tweet_count = self.tweet_statuses(
+                    community, [status], self.update_live_status, live, tweet_count)
 
             if limit and limit <= tweet_count:
                 logging.info("breaking tweet processing, limit: %d tweet_count: %d" %
@@ -727,26 +733,8 @@ class NicoBBS(object):
                 u"「%s」(%s)\n\n" % (news["title"], news["name"]),
                 u'[続き] ', news["desc"], u' [続く]')
 
-            for status in statuses:
-                if 0 < tweet_count:
-                    logging.debug("sleeping %d secs before next tweet..." % TWEET_INTERVAL)
-                    time.sleep(TWEET_INTERVAL)
-                try:
-                    self.update_twitter_status(community, status)
-                except TwitterDuplicateStatusUpdateError, error:
-                    logging.error("twitter status update error, duplicate: %s" % error)
-                    self.update_news_status(news, STATUS_DUPLICATE)
-                    break
-                except TwitterOverUpdateLimitError, error:
-                    logging.error("twitter status update error, over limit: %s" % error)
-                    raise
-                except TwitterStatusUpdateError, error:
-                    logging.error("twitter status update error, unknown: %s" % error)
-                    break
-                else:
-                    self.update_news_status(news, STATUS_COMPLETED)
-                    logging.info("status updated: [%s]" % status)
-                tweet_count += 1
+            tweet_count = self.tweet_statuses(
+                community, statuses, self.update_news_status, news, tweet_count)
 
             if limit and limit <= tweet_count:
                 logging.info("breaking tweet processing, limit: %d tweet_count: %d" %
@@ -819,26 +807,8 @@ class NicoBBS(object):
                 u"「%s」が投稿されました。%s" % (video["title"], video["link"]),
                 u' [続く]')
 
-            for status in statuses:
-                if 0 < tweet_count:
-                    logging.debug("sleeping %d secs before next tweet..." % TWEET_INTERVAL)
-                    time.sleep(TWEET_INTERVAL)
-                try:
-                    self.update_twitter_status(community, status)
-                except TwitterDuplicateStatusUpdateError, error:
-                    logging.error("twitter status update error, duplicate: %s" % error)
-                    self.update_video_status(video, STATUS_DUPLICATE)
-                    break
-                except TwitterOverUpdateLimitError, error:
-                    logging.error("twitter status update error, over limit: %s" % error)
-                    raise
-                except TwitterStatusUpdateError, error:
-                    logging.error("twitter status update error, unknown: %s" % error)
-                    break
-                else:
-                    self.update_video_status(video, STATUS_COMPLETED)
-                    logging.info("status updated: [%s]" % status)
-                tweet_count += 1
+            tweet_count = self.tweet_statuses(
+                community, statuses, self.update_video_status, video, tweet_count)
 
             if limit and limit <= tweet_count:
                 logging.info("breaking tweet processing, limit: %d tweet_count: %d" %
