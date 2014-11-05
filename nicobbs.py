@@ -73,6 +73,10 @@ class TwitterOverCharactersStatusUpdateError(TwitterStatusUpdateError):
     pass
 
 
+class TwitterSpamStatusUpdateError(TwitterStatusUpdateError):
+    pass
+
+
 class TwitterOverUpdateLimitError(TwitterStatusUpdateError):
     pass
 
@@ -218,19 +222,34 @@ class NicoBBS(object):
             # replace single quatation with double quatation to parse string properly
             normalized_reasons_string = re.sub("u'(.+?)'", r'"\1"', error.reason)
 
-            reasons = json.loads(normalized_reasons_string)
-            # logging.debug("reasons: %s %s" % (type(reasons), reasons))
-            for reason in reasons:
-                # logging.debug("reason: %s %s" % (type(reason), reason))
-                if reason["code"] == 187:
-                    # 'Status is a duplicate.'
-                    raise TwitterDuplicateStatusUpdateError(reason["message"], reason["code"])
-                elif reason["code"] == 186:
-                    # 'Status is over 140 characters.'
-                    raise TwitterOverCharactersStatusUpdateError(reason["message"], reason["code"])
-                elif reason["code"] == 185:
-                    # 'User is over daily status update limit.'
-                    raise TwitterOverUpdateLimitError(reason["message"], reason["code"])
+            reasons = None
+            try:
+                reasons = json.loads(normalized_reasons_string)
+                # logging.debug("reasons: %s %s" % (type(reasons), reasons))
+            except ValueError, error:
+                # typically parse error like;
+                # code 226 '"This request looks like it might be automated. ...'
+                logging.warning("json parse error, the error will be handled as text, not json.")
+
+            if reasons:
+                for reason in reasons:
+                    # logging.debug("reason: %s %s" % (type(reason), reason))
+                    message = reason["message"]
+                    code = reason["code"]
+                    if reason["code"] == 187:
+                        # 'Status is a duplicate.'
+                        raise TwitterDuplicateStatusUpdateError(message, code)
+                    elif reason["code"] == 186:
+                        # 'Status is over 140 characters.'
+                        raise TwitterOverCharactersStatusUpdateError(message, code)
+                    elif reason["code"] == 185:
+                        # 'User is over daily status update limit.'
+                        raise TwitterOverUpdateLimitError(message, code)
+            else:
+                if re.search(r'might be automated', normalized_reasons_string):
+                    # '"This request looks like it might be automated. ...'
+                    raise TwitterSpamStatusUpdateError("possible spam")
+
             raise TwitterStatusUpdateError()
 
     def tweet_statuses(self, community, statuses, update_handler, update_target, tweet_count=0):
@@ -255,6 +274,11 @@ class NicoBBS(object):
                 # status has over 140 characters. this is possible nicobbs bug.
                 logging.error("twitter status update error, over characters: %s" % error)
                 update_handler(update_target, STATUS_OVER_CHARS)
+                break
+            except TwitterSpamStatusUpdateError, error:
+                # spam rejected from twitter
+                logging.error("twitter status update error, spam: %s" % error)
+                update_handler(update_target, STATUS_SPAM)
                 break
             except TwitterStatusUpdateError, error:
                 # twitter error case including api limit
