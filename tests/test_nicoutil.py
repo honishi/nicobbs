@@ -95,3 +95,11 @@ def check(target):
 
         assert len(status) <= 140
         index += 1
+
+
+def test_replace_atmark():
+    statuses = nicoutil.create_twitter_statuses(u"a", u"", u"@abc", u"")
+    assert statuses[0] == u"a%abc"
+
+    statuses = nicoutil.create_twitter_statuses(u"a", u"", u"＠abc", u"")
+    assert statuses[0] == u"a%abc"

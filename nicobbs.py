@@ -28,13 +28,13 @@ CHANNEL_BASE_URL = 'http://ch.nicovideo.jp/'
 DATE_REGEXP = '.*(20../.+/.+\(.+\) .+:.+:.+).*'
 RESID_REGEXP = 'ID: (.+)'
 
-SKIP_LINK_REGEXPS = ["sm\d{5,}", "co\d{5,}", "https?://[\w/:%#\$&\?\(\)~\.=\+\-]+"]
+SKIP_LINK_REGEXPS = ["sm\d{5,}", "co\d{5,}", "lv\d{9,}", "ch\d{5,}", "im\d{5,}", "https?://[\w/:%#\$&\?\(\)~\.=\+\-]+"]
 MAX_SKIP_LINKS_IN_RESPONSE = 5
 
 DELETED_MESSAGE = u"削除しました"
 
 CRAWL_INTERVAL = 30
-COMMUNITY_INTERVAL = 5
+COMMUNITY_INTERVAL = 10
 TWEET_INTERVAL = 3
 
 # responses/lives just crawled from the web

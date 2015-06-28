@@ -27,8 +27,8 @@ REGEXP_TWITTER = r'@[A-Za-z0-9_]{1,15}'
 
 # replace twitter's @account with !account
 ENABLE_MASKING_TWITTER = True
-REGEXP_TWITTER_REPLACE_FROM = r'@([A-Za-z0-9_]{1,15})'
-REGEXP_TWITTER_REPLACE_TO = r'%\1'
+REGEXP_TWITTER_REPLACE_FROM = ur'[@＠]([A-Za-z0-9_]{1,15})'
+REGEXP_TWITTER_REPLACE_TO = ur'%\1'
 
 CHUNK_TYPE_UNKNOWN = 1
 CHUNK_TYPE_TEXT = 2
