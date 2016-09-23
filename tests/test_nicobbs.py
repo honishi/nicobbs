@@ -118,7 +118,7 @@ def test_find_community_name(bbs):
     assert html is not None
 
     community_name = bbs.find_community_name(html, community)
-    assert community_name == u"ニコプロ -ニコニコプロレスチャンネル-"
+    assert community_name == u"今日も元気におはよっさん 株式会社の章"
 
 
 def test_live_user(bbs):

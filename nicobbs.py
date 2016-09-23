@@ -653,7 +653,7 @@ class NicoBBS(object):
             if section:
                 lives = section.find_all("div", {"class": "item_right"})
                 for live in lives:
-                    title = live.find("h6", {"class": "title"})
+                    title = live.find("h2", {"class": "title"})
                     link = title.find("a")["href"]
                     date = live.find("p", {"class": "date"}).text
                     reserved_live = {"community": community,
