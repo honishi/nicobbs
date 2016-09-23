@@ -146,7 +146,10 @@ class NicoBBS(object):
 
 # utility
     def get_basic_config(self, config_file):
-        config = ConfigParser.ConfigParser()
+        defaults = {
+            "slack_token": None}
+
+        config = ConfigParser.ConfigParser(defaults)
         config.read(config_file)
         section = "nicobbs"
 
