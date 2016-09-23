@@ -14,6 +14,7 @@ import json
 import nicoutil
 from bs4 import BeautifulSoup
 import pymongo
+from slackclient import SlackClient
 import tweepy
 
 NICOBBS_CONFIG = os.path.dirname(os.path.abspath(__file__)) + '/nicobbs.config'
@@ -91,11 +92,11 @@ class NicoBBS(object):
         logging.config.fileConfig(config_file)
         logging.debug("initialized logger w/ file %s" % config_file)
 
-        self.mail, self.password, database_name, self.ng_words = (
+        self.mail, self.password, database_name, self.ng_words, self.slack_token = (
             self.get_basic_config(config_file))
         logging.debug(
-            "mail: %s password: xxxxxxxxxx database_name: %s ng_words: %s" %
-            (self.mail, database_name, self.ng_words))
+            "mail: %s password: xxxxxxxxxx database_name: %s ng_words: %s slack_token: %s" %
+            (self.mail, database_name, self.ng_words, self.slack_token))
 
         self.target_communities = []
         self.consumer_key = {}
@@ -108,10 +109,11 @@ class NicoBBS(object):
         self.skip_video = {}
         self.response_number_prefix = {}
         self.mark_hashes = {}
+        self.slack_id = {}
 
         for (community, consumer_key, consumer_secret, access_key, access_secret,
-                skip_bbs, skip_live, skip_news, skip_video,
-                response_number_prefix, mark_hashes) in self.get_community_config(config_file):
+                skip_bbs, skip_live, skip_news, skip_video, response_number_prefix,
+                mark_hashes, slack_id) in self.get_community_config(config_file):
             self.target_communities.append(community)
             self.consumer_key[community] = consumer_key
             self.consumer_secret[community] = consumer_secret
@@ -123,6 +125,7 @@ class NicoBBS(object):
             self.skip_video[community] = skip_video
             self.response_number_prefix[community] = response_number_prefix
             self.mark_hashes[community] = mark_hashes
+            self.slack_id[community] = slack_id
 
             logging.debug("*** community: " + community)
             logging.debug("consumer_key: %s secret: xxxxx" % self.consumer_key[community])
@@ -133,6 +136,7 @@ class NicoBBS(object):
             logging.debug("skip_video: %d" % self.skip_video[community])
             logging.debug("response_number_prefix: " + self.response_number_prefix[community])
             logging.debug("mark_hashes: %s" % self.mark_hashes[community])
+            logging.debug("slack_id: %s" % self.slack_id[community])
 
         self.connection = pymongo.Connection()
         self.database = self.connection[database_name]
@@ -154,8 +158,11 @@ class NicoBBS(object):
             ng_words = []
         else:
             ng_words = ng_words.split(',')
+        slack_token = config.get(section, "slack_token")
+        if slack_token == '':
+            slack_token = None
 
-        return mail, password, database_name, ng_words
+        return mail, password, database_name, ng_words, slack_token
 
     def get_community_config(self, config_file):
         result = []
@@ -166,7 +173,8 @@ class NicoBBS(object):
             "skip_news": "false",
             "skip_video": "false",
             "response_number_prefix": "",
-            "mark_hashes": None}
+            "mark_hashes": None,
+            "slack_id": None}
 
         config = ConfigParser.ConfigParser(defaults)
         config.read(config_file)
@@ -195,9 +203,11 @@ class NicoBBS(object):
                 else:
                     mark_hashes = mark_hashes.split(',')
 
+                slack_id = config.get(section, "slack_id")
+
                 result.append((community, consumer_key, consumer_secret, access_key,
                                access_secret, skip_bbs, skip_live, skip_news, skip_video,
-                               response_number_prefix, mark_hashes))
+                               response_number_prefix, mark_hashes, slack_id))
 
         return result
 
@@ -292,6 +302,23 @@ class NicoBBS(object):
             tweet_count += 1
 
         return tweet_count
+
+# slack
+    def post_response_to_slack(self, community, response):
+        token = self.slack_token
+        slack_id = self.slack_id[community]
+
+        if token is None or slack_id is None:
+            return
+
+        sc = SlackClient(token)
+
+        body = nicoutil.replace_body(response["body"])
+        message = ("*(" + response["number"] + ":" + response["name"] +
+                   ")*\n>>>" + body).encode("utf8")
+        res = sc.api_call("chat.postMessage", channel=slack_id, text=message)
+        logging.debug("slack response: %s" % res)
+        time.sleep(1)
 
 # network utility
     def create_opener(self):
@@ -545,9 +572,10 @@ class NicoBBS(object):
         logging.debug("registered: %s" % registered_responses)
         logging.info("finished to store responses.")
 
-    def tweet_response(self, community, response_number_prefix="", mark_hashes=[], limit=0):
+    def deliver_response(self, community, response_number_prefix="", mark_hashes=[], limit=0):
         unprocessed_responses = self.get_responses_with_community_and_status(
             community, STATUS_UNPROCESSED)
+
         tweet_count = 0
 
         logging.info("*** processing responses, community: %s unprocessed: %d" %
@@ -555,6 +583,7 @@ class NicoBBS(object):
 
         for response in unprocessed_responses:
             logging.debug("processing response #%s" % response["number"])
+            self.post_response_to_slack(community, response)
 
             response_number = response_number_prefix + response["number"]
             response_name = response["name"]
@@ -847,7 +876,7 @@ class NicoBBS(object):
             rawhtml = self.read_response_page(opener, community)
             responses = self.parse_response(rawhtml, community)
             self.store_response(responses, community)
-            self.tweet_response(community, response_number_prefix, mark_hashes)
+            self.deliver_response(community, response_number_prefix, mark_hashes)
         except TwitterOverUpdateLimitError:
             raise
         except urllib2.HTTPError, error:

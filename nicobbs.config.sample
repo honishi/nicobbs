@@ -4,6 +4,7 @@ password = p@ssword
 database_name = your_dbname
 # ng_words = ng_word_1,ng_word_2,...
 ng_words = 
+# slack_token = xxx
 
 [community-co12345]
 consumer_key = xxx
@@ -16,6 +17,8 @@ access_secret = xxx
 # skip_video = true
 # response_number_prefix = xxx
 # mark_hashes = hash1,hash2
+# slack_id(channel#) can be found at https://api.slack.com/methods/channels.list/test
+# slack_id = xxx
 
 [community-co67890]
 consumer_key = xxx
