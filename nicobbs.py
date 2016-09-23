@@ -146,7 +146,10 @@ class NicoBBS(object):
 
 # utility
     def get_basic_config(self, config_file):
-        config = ConfigParser.ConfigParser()
+        defaults = {
+            "slack_token": None}
+
+        config = ConfigParser.ConfigParser(defaults)
         config.read(config_file)
         section = "nicobbs"
 
@@ -355,7 +358,7 @@ class NicoBBS(object):
 
 # misc utility
     def find_community_name(self, rawhtml, community):
-        soup = BeautifulSoup(rawhtml)
+        soup = BeautifulSoup(rawhtml, 'html.parser')
 
         if self.is_channel(community):
             return soup.find("h1", {"class": "channel_name"}).text
@@ -494,7 +497,7 @@ class NicoBBS(object):
     def parse_response(self, rawhtml, community):
         logging.info("*** parsing responses, community: %s" % community)
 
-        soup = BeautifulSoup(rawhtml)
+        soup = BeautifulSoup(rawhtml, 'html.parser')
         resheads = soup.findAll("dt", {"class": "reshead"})
         resbodies = soup.findAll("dd", {"class": "resbody"})
         responses = []
@@ -643,14 +646,14 @@ class NicoBBS(object):
         community_name = self.find_community_name(rawhtml, community)
 
         reserved_lives = []
-        soup = BeautifulSoup(rawhtml)
+        soup = BeautifulSoup(rawhtml, 'html.parser')
 
         if self.is_channel(community):
             section = soup.find("section", {"class": "future"})
             if section:
                 lives = section.find_all("div", {"class": "item_right"})
                 for live in lives:
-                    title = live.find("h6", {"class": "title"})
+                    title = live.find("h2", {"class": "title"})
                     link = title.find("a")["href"]
                     date = live.find("p", {"class": "date"}).text
                     reserved_live = {"community": community,
@@ -727,7 +730,7 @@ class NicoBBS(object):
         community_name = self.find_community_name(rawhtml, community)
 
         news_items = []
-        soup = BeautifulSoup(rawhtml)
+        soup = BeautifulSoup(rawhtml, 'html.parser')
 
         community_news_tag = soup.find(id="community_news")
         if community_news_tag:
@@ -812,7 +815,7 @@ class NicoBBS(object):
         logging.info("*** parsing community video, community: %s" % community)
 
         videos = []
-        soup = BeautifulSoup(rawhtml)
+        soup = BeautifulSoup(rawhtml, 'html.parser')
         video_tag = soup.find(id="video")
 
         if video_tag:

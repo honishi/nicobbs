@@ -4,11 +4,11 @@
 
 
 
-<!--[if !IE]>--><html class="webkit "><!--<![endif]-->
-<!--[if IE 7]><html class="webkit  ie ie7 lte_ie7 lte_ie8 lte_ie9 lte_ie10"><![endif]-->
-<!--[if IE 8]><html class="webkit  ie ie8 lte_ie8 lte_ie9 lte_ie10"><![endif]-->
-<!--[if IE 9]><html class="webkit  ie ie9 lte_ie9 lte_ie10"><![endif]-->
-<!--[if gte IE 10]><html class="webkit  ie ie10 lte_ie10"><![endif]-->
+<!--[if !IE]>--><html class="webkit "><!--<![endif]-->
+<!--[if IE 7]><html class="webkit  ie ie7 lte_ie7 lte_ie8 lte_ie9 lte_ie10"><![endif]-->
+<!--[if IE 8]><html class="webkit  ie ie8 lte_ie8 lte_ie9 lte_ie10"><![endif]-->
+<!--[if IE 9]><html class="webkit  ie ie9 lte_ie9 lte_ie10"><![endif]-->
+<!--[if gte IE 10]><html class="webkit  ie ie10 lte_ie10"><![endif]-->
 
 <head>
 
@@ -16,40 +16,44 @@
 <meta http-equiv="Content-Script-Type" content="text/javascript">
 <meta http-equiv="Content-Style-Type" content="text/css">
 <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
-<meta name="copyright" content="(C) niwango, inc. All rights reserved.">
+<meta name="copyright" content="(C) DWANGO Co., Ltd.">
 
 
 
 
 
-<title>生放送:ニコプロ -ニコニコプロレスチャンネル-(ニコニコプロレスチャンネル) - ニコニコチャンネル:スポーツ</title>
-<meta name="keywords" content="PROWRESTLING,スターダム,スポーツ,ドラゴンゲート,ニコニコプロレス,ニコプロ,プロレス,プロレスリング・ノア,全日本プロレス,新日本プロレス,動画,無料,ニコニコチャンネル,niconico">
-<meta name="description" content="あなたに新しいプロレスライフを提供するプロレス専門チャンネル「ニコニコプロレスチャンネル」プロレス界の最新情報から、レスラーによるトーク番組。注目大会の試合中継などを生放送予定。">
+<title>生放送:今日も元気におはよっさん 株式会社の章(森義之) - ニコニコチャンネル:エンタメ</title>
+<meta name="keywords" content="エンターテイメント,パチスロ,よっさん,外配信,森義之,競馬,雑談,動画,無料,ニコニコチャンネル,niconico"><meta name="description" content="株式会社今日も元気におはよっさん！このチャンネルは代表取締役の森義之こと、よっさんが立ち上げた企業チャンネルだ！これからチャンネル放送をして色んな事に挑戦していきたいと思う。今までもこれからも変わ...">
 
 
-			<meta property="og:image" content="http://icon.nimg.jp/channel/ch1487.jpg?1397220855">
+								
+			
+
+
+			<meta property="og:image" content="http://icon.nimg.jp/channel/ch2621556.jpg?1468234105">
 	
 
 
 <link rel="shortcut icon" href="http://ch.nicovideo.jp/favicon.ico?111206">
 
-<link rel="stylesheet" href="http://ch.res.nimg.jp/js/nicoheader/resources/nicolib-CommonNotificationHeader.css?2013-11-25">
-<link rel="stylesheet" href="http://ch.res.nimg.jp/js/nicoheader/resources/siteHeader.css?2013-11-25">
-<link rel="stylesheet" href="http://ch.res.nimg.jp/css/base.css?2014-04-09">
+<link rel="stylesheet" href="http://ch.res.nimg.jp/js/nicoheader/resources/nicolib-CommonNotificationHeader.css?2014-10-23">
+<link rel="stylesheet" href="http://ch.res.nimg.jp/js/nicoheader/resources/siteHeader.css?2015-10-23">
+<link rel="stylesheet" href="http://ch.res.nimg.jp/css/base.css?2016-08-10">
 
 
 
 
-<link rel="alternate" type="application/rss+xml" title="ニコプロ -ニコニコプロレスチャンネル- チャンネル生放送" href="/nicopro/live?rss=2.0">
 
-<link rel="stylesheet" href="http://ch.res.nimg.jp/css/channel/channel_base.css?2013-08-08">
+<link rel="alternate" type="application/rss+xml" title="今日も元気におはよっさん 株式会社の章 チャンネル生放送" href="/kyoumogenkiniohayossan/live?rss=2.0">
+
+<link rel="stylesheet" href="http://ch.res.nimg.jp/css/channel/channel_base.css?2015-08-26">
 
 	<style type="text/css"><!--
-section.site_body {background-color:#ffffff;background-position:left top;background-repeat:no-repeat;background-attachment:scroll;color:#333333;}
+section.site_body {background-color:#be4e22;background-position:center center;background-repeat:repeat;background-attachment:scroll;color:#333333;}
 section.site_body a {color:#6296c1;}
 section.site_body a:visited {color:#6179bf;}
 
-div#channel-main  {background-color:#ffffff;background-position:left top;background-repeat:no-repeat;background-attachment:scroll;color:#333333;}
+div#channel-main  {background-color:#be4e22;background-image:url(http://com.res.nimg.jp/material/3232757/start.jpg);background-position:center center;background-repeat:repeat;background-attachment:scroll;color:#333333;}
 div#channel-main a {color:#6296c1;}
 div#channel-main a:visited {color:#6179bf;}
 
@@ -65,18 +69,51 @@ div#channel-main a:visited {color:#6179bf;}
 
 
 
+
+
+<script>
+var is_login   = true;
+var is_premium = false;
+var is_channel = true;
+var nicopo_balance = is_login? -1:false;
+var page_code  = "live_list"||null;
+var page_id    = "ch_live"||null;
+user = {
+	"id":22389064,
+	"sex":"男性",
+	"age":39
+};
+var community = {
+	"type":"premium"
+};
+var channeloption = {
+	"first_month_free_flag":false};
+
+//ageは年齢、不明の場合はnullを指定
+//genderは男=>1, 女=>2, 不明=>nullを指定
+var ad_age    = null;
+var ad_gender = null;
+if(typeof user=="object") {
+	ad_age    = user.age;
+	ad_gender = user.sex=="男性"? 1 : 2 ;
+}
+
+</script>
+
+
+
 <!--[if lte IE 8]>
 <script src="http://ch.res.nimg.jp/js/lib/iepp.min.js"></script>
 <![endif]-->
 
-<script src="http://ch.res.nimg.jp/js/nicoheader/siteHeader.js?2013-11-25"></script>
-<script src="http://ch.res.nimg.jp/js/nicoheader/nicolib-CommonNotificationHeader.js?2013-11-25"></script>
+<script src="http://ch.res.nimg.jp/js/nicoheader/siteHeader.js?2015-09-09"></script>
+<script src="http://ch.res.nimg.jp/js/nicoheader/nicolib-CommonNotificationHeader.js?2014-10-23"></script>
 
 <script src="http://ch.res.nimg.jp/js/lib/prototype.1.6.1.min.js"></script>
 <script>Element.addMethods();</script>
 <script src="http://ch.res.nimg.jp/js/lib/jquery/jquery-1.8.3.min.js"></script>
 <script>jQuery.noConflict();</script>
-<script src="http://ch.res.nimg.jp/js/common.js?2014-03-03"></script>
+<script src="http://ch.res.nimg.jp/js/common.js?2014-07-08"></script>
 
 
 
@@ -86,7 +123,9 @@ div#channel-main a:visited {color:#6179bf;}
 <script src="http://ch.res.nimg.jp/js/lib/swfobject.js?v1.5.1"></script>
 <script src="http://ch.res.nimg.jp/js/nicolib.js?2011-12-07"></script><script src="http://ch.res.nimg.jp/js/ads.js?2010-02-22"></script>
 
-<script src="http://ads.nicovideo.jp/assets/js/ads-2.js"></script>
+<script src="http://ads.nicovideo.jp/assets/js/ads-2.16.0.min.js"></script>
+
+
 
 
 
@@ -102,7 +141,7 @@ var MSG_CHBOOKMARK = {
 };
 </script>
 
-<script src="http://ch.res.nimg.jp/js/base_cp.js?2011-12-13"></script>
+<script src="http://ch.res.nimg.jp/js/base_cp.js?2016-02-25"></script>
 
 <script>
 Nico.LazyImage.margin=400;
@@ -112,17 +151,31 @@ Nico.LazyImage.initialize();
 
 
 <script>
-var is_login   = true;
-var is_premium = true;
-var is_channel = true;
-var community = {
-	"type":"premium"
-};
-var channeloption = {
-	"first_month_free_flag":0
-};
+(function() {
+  var projectId = 3220900902;
+  var protocol = ('https:' == document.location.protocol ?
+  'https://' : 'http://');
+  var scriptTag = document.createElement('script');
+  scriptTag.type = 'text/javascript';
+  scriptTag.async = true;
+  scriptTag.src = protocol + 'cdn.optimizely.com/js/' +
+  projectId + '.js';
+  var s = document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(scriptTag, s);
+})();
+function optimizelyTimeout() {
+  window.optimizely = window.optimizely|| [];
+  if (!window.optimizely.data) {
+    window.optimizely.push("timeout");
+  }else{
+    window.optimizely.push(['setDimensionValue', 5135740024, is_login? "ログイン済":"非ログイン" ]);//ログイン非ログイン
+    window.optimizely.push(['setDimensionValue', 5137300909, is_premium? "プレミアム会員":"一般会員" ]);//ニコニコ会員
+    window.optimizely.push(['setDimensionValue', 5139840038, nicopo_balance>=216? "216pt以上":"216pt未満"]);//ニコポ残高が216以上未満
+  }
+}
+setTimeout(optimizelyTimeout, 1000);
 </script>
-<script src="//cdn.optimizely.com/js/484480562.js"></script>
+
 
 <script src='http://partner.googleadservices.com/gampad/google_service.js'></script>
 <script>
@@ -137,67 +190,74 @@ GA_googleAddSlot("ca-pub-1828667301391598", "blomaga_468x60");
 GA_googleFetchAds();
 </script>
 
+<script>is_show_bylaw_menu = false;</script>
+
 </head>
 
 <body id="live_list"class="
  ja  channel personal">
 
+
+
 		<header class="site">
 		<div id="siteHeader">
 	<div id="siteHeaderInner">
 		<ul class="siteHeaderGlovalNavigation nav_items">
-			<li><a href="http://www.nicovideo.jp/?header"><span>niconico</span></a></li>
+			<li><a href="http://www.nicovideo.jp/?header" class="iconNiconico"><span>niconico</span></a></li>
 			<li><a href="http://www.nicovideo.jp/video_top?header"><span>動画</span></a></li>
 			<li><a href="http://seiga.nicovideo.jp/?header"><span>静画</span></a></li>
 			<li><a href="http://live.nicovideo.jp/?header"><span>生放送</span></a></li>
 			<li><a href="http://ch.nicovideo.jp/?header"><span>チャンネル</span></a></li>
 			<li><a href="http://ch.nicovideo.jp/portal/blomaga?header"><span>ブロマガ</span></a></li>
+			<li><a href="https://kakuyomu.jp/?utm_source=niconico&utm_medium=top_header&utm_campaign=niconico_top" target="_blank"><span>カクヨム</span></a></li>
 			<li class="siteHeaderOther" id="siteHeaderLeftMenu">
 				<a href="javascript:void(0);"><span>その他▼</span></a>
 				<ul id="siteHeaderLeftMenuContainer" class="siteHeaderDropdown" style="display:none;">
 					<li><a href="http://app.nicovideo.jp/?header">アプリ</a></li>
-					<li><a href="http://dic.nicovideo.jp/?header">大百科</a></li>
 					<li><a href="http://ichiba.nicovideo.jp/?header">市場</a></li>
+					<li><a href="http://dic.nicovideo.jp/?header">大百科</a></li>
 					<li><a href="http://uad.nicovideo.jp/?header">ニコニ広告</a></li>
-					<li><a href="http://jk.nicovideo.jp/?header">実況</a></li>
 					<li><a href="http://commons.nicovideo.jp/?header">コモンズ</a></li>
+					<li><a href="http://niconare.nicovideo.jp/?header">ニコナレ</a></li>
+					<li><a href="http://3d.nicovideo.jp/?header">ニコニ立体</a></li>
+					<li><a href="http://jk.nicovideo.jp/?header">実況</a></li>
 					<li><a href="http://com.nicovideo.jp/?header">コミュ二ティ</a></li>
-					<li><a href="http://chokuhan.nicovideo.jp/?header">ニコニコ直販</a></li>
-					<li><a href="http://info.nicovideo.jp/pr_nicom/iphone.html?header">スマートフォン</a></li>
 					<li><a href="http://news.nicovideo.jp/?header">ニュース</a></li>
-					<li class="menuServiceList"><a href="http://www.nicovideo.jp/top_service?header">サービス一覧</a></li>
+					<li><a href="https://www.denfaminicogamer.jp/?header" target="_blank">電ファミ</a></li>
+					<li class="menuServiceList"><a href="http://www.nicovideo.jp/top_service?header">サービス・デバイス一覧</a></li>
 				</ul>
 			</li>
 		</ul>
 		<ul class="siteHeaderMenuList">
 							<!-- start notification header -->
 				<li id="siteHeaderNotification"
-					data-nico-userId="79595"
+					data-nico-userId="22389064"
 					data-nico-siteId="nicocha"
-					data-nico-API-Date="1397302630"
+					data-nico-API-Date="1474632051"
 					data-nico-API-Version="2"
 					data-nico-locale="ja_JP"
-					data-nico-API-Key="3b50025b9d603f628e2316c0bfd211682e15418c"
+					data-nico-API-Key="69a3a6c7782be63d732d6a3f7f3a4d7d126b7210"
 					data-nico-JSONP-URL="http://notify.nicovideo.jp/api/notify"
 					data-nico-count="0"
 					data-nico-userIconUrl="http://res.nimg.jp/img/user/thumb/blank_s.jpg"
 					data-nico-isError="false"
 					data-nico-isMaintenance="false"
 					data-nico-config-nicorepores="1"
-					data-nico-config-nicoru="1"
 					data-nico-config-stampget="1"
 					data-nico-config-blomagacomment="1"
-					class="siteHeaderPremium"				>
-				<a href="http://www.nicovideo.jp/my/top" class="nav_item" id="userContainer"><span class="siteHeaderAva" id="siteHeaderUserIconContainer"></span><span id="siteHeaderUserNickNameContainer">honishi</span><span class="san">さん</span></a><div class="siteHeaderNotificationContainer" id="siteHeaderNotificationContainer"><dl id="siteHeaderNotificationWithNotification" style="display:none;"></dl><div id="siteHeaderNotificationWithoutNotification" style="display:none;"><span></span><p>あなた宛のお知らせが届くとここに表示されます。</p><p id="siteHeaderShowConfigButton" class="siteHeaderInformationOption">設定変更</p></div><dl id="siteHeaderNotificationLoading" style="display: none;"><dt>お知らせ<span></span></dt><dd><span><img src="http://ch.res.nimg.jp/img/common/spinner.16x16.time.gif"></span>お知らせを読み込んでいます…</dd></dl><dl id="siteHeaderNotificationError" style="display:none;"><dt>お知らせ<span></span></dt><dd id="siteHeaderNotificationError503Detail">お知らせが取得できませんでした。しばらく待って再度お試しください。</dd><dd id="siteHeaderNotificationError503Config" style="display: none;">設定が反映できませんでした。しばらく待って再度お試しください。</dd><dd id="siteHeaderNotificationError401" style="display: none;">ログインされておりません。再度ログインしなおしてください。</dd></dl><dl id="siteHeaderNotificationMaintenance" style="display:none;"><dt>お知らせ<span></span></dt><dd>只今メンテナンス中です。</dd></dl><dl id="siteHeaderNotificationOption" style="display: none;"><dt>設定<span></span></dt><dd><p class="siteHeaderSwitch siteHeaderFirstChild">ニコレポコメントのお知らせ<span id="siteHeaderConfigNicoreporesButton" class="siteHeaderEnable"></span></p><p class="siteHeaderSwitch">スタンプ取得のお知らせ<span id="siteHeaderConfigStampgetButton" class="siteHeaderEnable"></span></p><p class="siteHeaderSwitch">ニコられた数の通知<span id="siteHeaderConfigNicoruButton" class="siteHeaderEnable"></span></p><p class="siteHeaderSwitch lastChild">ブロマガコメントのお知らせ<span id="siteHeaderConfigBlomagacommentButton" class="siteHeaderEnable"></span></p><a href="javascript:void(0);" id="siteHeaderApplyConfigButton" class="siteHeaderSubmitButtonDisable">変更を適用する</a></dd><dd class="siteHeaderInformationOption"><a href="javascript:void(0);" id="siteHeaderBackDetail">一覧に戻る</a><a href="javascript:void(0);" id="siteHeaderBackDetailChanged" style="display: none;">閉じる</a></dd><!--dd class="informationOption"><a href="">戻る</a></dd--></dl></div><a href="http://www.nicovideo.jp/?p=premium_top&amp;sec=bar"class="siteHeaderUpgrade nav_item" id="siteHeaderNotificationPremium"><span>プレミアム登録</span></a><span class="siteHeaderNicopo"><a href="http://point.nicovideo.jp/index/bank/?from_notification=1"class="siteHeaderNicopoBalance">0<span class="unit">pt</span></a><a href="http://point.nicovideo.jp/index/asp/purchase_point?from_notification=1"class="siteHeaderNicopoPurchase" id="nicopoPurchase"data-F_return_url="http://ch.nicovideo.jp/nicopro/live"data-F_site_cd="S0007"><span class="tooltip">ニコニコポイントを購入</span></a></span>
+									>
+				<a href="http://www.nicovideo.jp/my/top" class="nav_item" id="userContainer"><span class="siteHeaderAva" id="siteHeaderUserIconContainer"></span><span id="siteHeaderUserNickNameContainer">honishiii</span><span class="san">さん</span></a><div class="siteHeaderNotificationContainer" id="siteHeaderNotificationContainer"><dl id="siteHeaderNotificationWithNotification" style="display:none;"></dl><div id="siteHeaderNotificationWithoutNotification" style="display:none;"><span></span><p>あなた宛のお知らせが届くとここに表示されます。</p><p id="siteHeaderShowConfigButton" class="siteHeaderInformationOption">設定変更</p></div><dl id="siteHeaderNotificationLoading" style="display: none;"><dt>お知らせ<span></span></dt><dd><span><img src="http://ch.res.nimg.jp/img/common/spinner.16x16.time.gif"></span>お知らせを読み込んでいます…</dd></dl><dl id="siteHeaderNotificationError" style="display:none;"><dt>お知らせ<span></span></dt><dd id="siteHeaderNotificationError503Detail">お知らせが取得できませんでした。しばらく待って再度お試しください。</dd><dd id="siteHeaderNotificationError503Config" style="display: none;">設定が反映できませんでした。しばらく待って再度お試しください。</dd><dd id="siteHeaderNotificationError401" style="display: none;">ログインされておりません。再度ログインしなおしてください。</dd></dl><dl id="siteHeaderNotificationMaintenance" style="display:none;"><dt>お知らせ<span></span></dt><dd>只今メンテナンス中です。</dd></dl><dl id="siteHeaderNotificationOption" style="display: none;"><dt>設定<span></span></dt><dd><p class="siteHeaderSwitch siteHeaderFirstChild">ニコレポコメントのお知らせ<span id="siteHeaderConfigNicoreporesButton" class="siteHeaderEnable"></span></p><p class="siteHeaderSwitch">スタンプ取得のお知らせ<span id="siteHeaderConfigStampgetButton" class="siteHeaderEnable"></span></p><p class="siteHeaderSwitch lastChild">ブロマガコメントのお知らせ<span id="siteHeaderConfigBlomagacommentButton" class="siteHeaderEnable"></span></p><a href="javascript:void(0);" id="siteHeaderApplyConfigButton" class="siteHeaderSubmitButtonDisable">変更を適用する</a></dd><dd class="siteHeaderInformationOption"><a href="javascript:void(0);" id="siteHeaderBackDetail">一覧に戻る</a><a href="javascript:void(0);" id="siteHeaderBackDetailChanged" style="display: none;">閉じる</a></dd><!--dd class="informationOption"><a href="">戻る</a></dd--></dl></div><span class="siteHeaderNicopo" style="display:none"><a href="http://point.nicovideo.jp/index/bank/?from_notification=1"class="siteHeaderNicopoBalance">- <span class="unit">pt</span></a><a href="http://point.nicovideo.jp/index/asp/purchase_point?from_notification=1"class="siteHeaderNicopoPurchase" id="nicopoPurchase"data-F_return_url="http://ch.nicovideo.jp/kyoumogenkiniohayossan/live"data-F_site_cd="S0007"><span class="tooltip">ニコニコポイントを購入</span></a></span><a href="https://account.nicovideo.jp/premium/register?sec=bar"class="siteHeaderUpgrade nav_item" id="siteHeaderNotificationPremium"data-site="nicocha"><span>プレミアム登録</span></a>
 				</li>
 			
-							<li class="siteHeaderChSignup">
-					<a href="/blomaga" class="nav_item">
-						<span>ブログをはじめる</span>
-					</a>
-				</li>
-						<!-- end notification header -->
-			<li>
+												<li class="siteHeaderChSignup newChannel">
+						<a href="/start" class="nav_item">
+							<span>チャンネルを開設</span>
+						</a>
+					</li>
+							
+			<!-- end notification header -->
+
+			<li class="purchased">
 				<a href="/my/purchased" class="nav_item">
 					<span>購入したもの</span>
 				</a>
@@ -271,7 +331,7 @@ GA_googleFetchAds();
 					</li>
 
 					<li class="need_login">
-						<a class="container" href="https://secure.nicovideo.jp/secure/">
+						<a class="container" href="https://account.nicovideo.jp/my/account">
 							<dl>
 								<dt class="title">アカウント設定</dt>
 								<dd>
@@ -283,7 +343,7 @@ GA_googleFetchAds();
 						</a>
 					</li>
 										<li>
-						<a class="container" href="https://secure.nicovideo.jp/secure/logout">
+						<a class="container" href="https://account.nicovideo.jp/logout">
 							<dl>
 								<dt class="title">ログアウト</dt>
 								<dd>
@@ -310,31 +370,63 @@ GA_googleFetchAds();
 </div>
 
 
+
+<script>
+jQuery(document).ready(function(){
+	//ユーザー名の最大幅を計算
+	var adjustNicknameWidth = function(){
+		if(is_login) {
+			//お知らせ残件数左offset
+			var notify_left     = jQuery("#siteHeaderNotificationContainer").offset().left - jQuery("#siteHeaderInner").offset().left;
+			//左側nicoファミリーサイト群の幅
+			var nico_navi_width = jQuery(".siteHeaderGlovalNavigation").width();
+			//ユーザーサムネとmarginの幅
+			var userthumb_width = 34;
+			//"さん"文字列の幅
+			var san_width       = 30;
+			//少し余裕を持たせる
+			var side_margin     = 2;
+			//nicknameが使える最大幅を計算
+			var nick_width_px = Math.floor( notify_left - nico_navi_width - userthumb_width - san_width - side_margin*2 )+"px";
+			//css設定
+			jQuery("#siteHeaderUserNickNameContainer").css("max-width",nick_width_px);
+			return nick_width_px;
+		}else{
+			return false;
+		}
+	}
+	setTimeout(adjustNicknameWidth,0);//実行タイミングをズラす
+	window.adjustNicknameWidth = adjustNicknameWidth;
+});
+</script>
+
+
 							<div id="head_cp">
 	<div class="head_inner">
 
 	<nav class="head_breadcrumb" id="head_cp_breadcrumb">
-		<h1 class="channel_name"><a href="/nicopro">ニコプロ -ニコニコプロレスチャンネル-</a></h1>
+		<h1 class="channel_name"><a href="/kyoumogenkiniohayossan">今日も元気におはよっさん 株式会社の章</a></h1>
 		<div class="site_logo"><a href="http://ch.nicovideo.jp/"><img src="http://ch.res.nimg.jp/img/base/niconico_channel_small.png" alt="ニコニコチャンネル"></a></div>
 
 								<div class="channel_category">
-
-												<a href="/portal/sports">
-					スポーツ
+				<a href="/portal/entertainment">
+					エンタメ
 				</a>
-								<menu class="switch_category">
+				<menu class="switch_category">
 					<span class="other">▼</span>
 					<ul id="other_categories_list" style="display:none;">
-						<li ><a href="/portal/blomaga">ブロマガ</a>
+						<li ><a href="/portal/event">イベント</a>
+<li ><a href="/portal/blomaga">ブロマガ</a>
 <li ><a href="/portal/anime">アニメ</a>
 <li ><a href="/portal/movie">映画・ドラマ</a>
 <li ><a href="/portal/media">社会・言論</a>
 <li ><a href="/portal/music">音楽</a>
 <li ><a href="/portal/tokusatsu">特撮</a>
-<li ><a href="/portal/entertainment">エンタメ</a>
-<li class="selected"><a href="/portal/sports">スポーツ</a>
+<li class="selected"><a href="/portal/entertainment">エンタメ</a>
+<li ><a href="/portal/sports">スポーツ</a>
 <li ><a href="/portal/showbiz">芸能</a>
 <li ><a href="/portal/life">生活</a>
+<li ><a href="/portal/politics">政治</a>
 <li ><a href="/portal/game">ゲーム</a>
 <li ><a href="/portal/variety">バラエティ</a>
 <li ><a href="/portal/gravure">グラビア</a>					</ul>
@@ -350,11 +442,11 @@ GA_googleFetchAds();
 		
 		
 										<div class="sns_button twitter">
-			<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-url="http://ch.nicovideo.jp/nicopro" data-text="ニコプロ -ニコニコプロレスチャンネル- #nicoch" data-count="none" data-lang="ja">Tweet</a>
+			<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-url="http://ch.nicovideo.jp/kyoumogenkiniohayossan" data-text="今日も元気におはよっさん 株式会社の章 #nicoch" data-count="none" data-lang="ja">Tweet</a>
 		</div>
 
 		<div class="sns_button facebook">
-			<iframe src="http://www.facebook.com/plugins/like.php?href=http://ch.nicovideo.jp/nicopro&locale=&app_id=227837487254498&amp;send=false&amp;layout=button_count&amp;width=100&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"
+			<iframe src="http://www.facebook.com/plugins/like.php?href=http://ch.nicovideo.jp/kyoumogenkiniohayossan&locale=&app_id=227837487254498&amp;send=false&amp;layout=button_count&amp;width=100&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"
 			style="width:110px; height:21px"></iframe>
 					</div>
 
@@ -363,8 +455,8 @@ GA_googleFetchAds();
 			<button class="btn_share_toggle"><span class="down">▼</span><span class="up">▲</span></button>
 			<div id="head_sns_share_more">
 				<ul>
-					<li class="hatebu"><a href="http://b.hatena.ne.jp/entry/http://ch.nicovideo.jp/nicopro" class="hatena-bookmark-button" data-hatena-bookmark-title="ニコプロ -ニコニコプロレスチャンネル- - ニコニコチャンネル" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20"></a>
-					<li class="gplus"><g:plusone size="medium" href="http://ch.nicovideo.jp/nicopro"></g:plusone>
+					<li class="hatebu"><a href="http://b.hatena.ne.jp/entry/http://ch.nicovideo.jp/kyoumogenkiniohayossan" class="hatena-bookmark-button" data-hatena-bookmark-title="今日も元気におはよっさん 株式会社の章 - ニコニコチャンネル" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20"></a>
+					<li class="gplus"><g:plusone size="medium" href="http://ch.nicovideo.jp/kyoumogenkiniohayossan"></g:plusone>
 				</ul>
 			</div>
 		</div>
@@ -396,51 +488,62 @@ GA_googleFetchAds();
 								<nav class="current channel" id="cp_menu">
 				<ul>
 																	
-															
+									
 						<li class="">
-							<a href="/nicopro">トップ</a>
+							<a href="/kyoumogenkiniohayossan">トップ</a>
 
 																				<li class="">
-								<a href="/nicopro/video">動画</a>
+								<a href="/kyoumogenkiniohayossan/video">動画</a>
 						
 						
 																																			<li class="selected">
-								<a href="/nicopro/live">生放送</a>
+								<a href="/kyoumogenkiniohayossan/live">生放送</a>
 						
 																				<li class="">
-								<a href="/nicopro/blomaga">ブロマガ</a>
+								<a href="/kyoumogenkiniohayossan/blomaga">ブロマガ</a>
 						
-												
+						
 																				<li class="">
-								<a href="/nicopro/bbs">掲示板</a>
+								<a href="/kyoumogenkiniohayossan/bbs">掲示板</a>
+						
 						
 													</ul>
 			</nav>
 					
-								<div id="head_cp_favorite">
+		<div class="join_leave">
+					<div class="cell">
+
 				
-																	<a href="/nicopro/live#"
-							class="chbookmark "
-							api_add   ="http://ch.nicovideo.jp/api/addbookmark"
-							api_delete="http://ch.nicovideo.jp/api/deletebookmark"
-							params="channel_id=1487&time=1397302630&key=74c091d4be65caba079a2614764593782c9a972d&return_json=1">
-							<span class="spinner"></span>
-							<span class="msg_0">お気に入り登録</span>
-							<span class="msg_1">お気に入り登録</span>
-							<span class="msg_2">登録済みです</span>
-							<span class="msg_3">登録を解除する</span>
-						</a>
-						<script>jQuery("#head_cp_favorite").find("a.chbookmark").click(chbookmark.fire);</script>
-																		</div>
-						</div>
+					<a class="join "
+			href="https://secure.ch.nicovideo.jp/bylaw/ch2621556">
+				チャンネルに入会
+			</a>
+			</div>
+						
+								<div class="cell">
+				<a href="/kyoumogenkiniohayossan/live#"
+				class="bookmark  chbookmark"
+				api_add   ="http://ch.nicovideo.jp/api/addbookmark"
+				api_delete="http://ch.nicovideo.jp/api/deletebookmark"
+				params="channel_id=2621556&time=1474632051&key=2756a3ef3b3d3ec1035ae5fe2663d892d94be24d&return_json=1">
+					<span class="spinner"></span>
+					<span class="msg_0">お気に入り登録</span>
+					<span class="msg_1">お気に入り登録</span>
+					<span class="msg_2">登録済みです</span>
+					<span class="msg_3">登録を解除する</span>
+				</a>
+			</div>
+										<script>jQuery("body").on("click","a.chbookmark",chbookmark.fire);</script>
+		</div>
+
+	</div>
 	</div>	
 	
 	
-
-			
-				
-				
 	
+
+					
+						
 	
 		
 		
@@ -490,11 +593,9 @@ GA_googleFetchAds();
 	
 
 
-	
-	
 
-		
-					</header>
+
+			</header>
 
 	<section class="site_body">
 		<article class="content white">
@@ -507,56 +608,19 @@ GA_googleFetchAds();
 	<menu class="scopebar">
 		<ul>
 			<li class="selected">
-				<a class="scope" href="/nicopro/live">すべて</a>
+				<a class="scope" href="/kyoumogenkiniohayossan/live">すべて</a>
 			<li >
-				<a class="scope" href="/nicopro/live/pay">有料</a>
+				<a class="scope" href="/kyoumogenkiniohayossan/live/pay">有料</a>
 		</ul>
 	</menu>
 </header>
 
 		<!--↓現在の生放送中あり↓-->
 		<section class="sub now">
-						<div id="live_now">
-		<h1>放送中</h1>
-			<div id="live_now_cnt">
-								<ul class="items">
-					<li class="item">
-						<div class="item_left">
-														
-
-
-
-
-
-
-<span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/watch/lv174719178"
-	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/199466.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
-		
-	</a>
-</span>													</div>
-					<!--<a href="http://live.nicovideo.jp/watch/lv174719178"><img src="http://live.nicovideo.jp/thumb/199466.jpg" alt="" title="ニコプロ生中継 暗黒プロレス組織666 4.12新木場大会" class="thmb"></a>-->
-						<div class="item_right">
-							<p class="title"><a href="http://live.nicovideo.jp/watch/lv174719178">ニコプロ生中継 暗黒プロレス組織666 4.12新木場大会</a></p>
-							<p class="description">暗黒プロレス組織666 4.12新木場大会を生中継します！・ザ・クレイジーSKB選手の試合は肖像権の都合で放送できません。予めご了承ください。※チャンネル会員以外の方も無料でご視聴頂ける部分もあります。※タイム...</p>
-							<p class="live_btn"><a href="http://live.nicovideo.jp/watch/lv174719178"><img src="http://ch.res.nimg.jp/img/lives/btn_live.png" alt=""></a></p>
-																		</div>
-					</li>
-				</ul>
-				</div>
-		</div>
-		<!--// live_index //-->
-		
-		<!--↑現在の生放送中あり↑-->
-				</section>
+						</section>
 
 		<section class="sub future">
-							<!--↓予約番組あり↓-->
-			<h1>
-			放送予定
-			</h1>
+										<h1>放送予定</h1>
 
 											<div class="item cfix">
 					<ul class="items">
@@ -570,24 +634,22 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv174782687"
+	<a href="http://live.nicovideo.jp/gate/lv274998037"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/199467.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/442415.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>						</div>
 						<div class="item_right">
-							<h6 class="title"><a href="http://live.nicovideo.jp/gate/lv174782687">ニコプロ生放送 １周年記念公開収録～西へ</a></h6>
-							<p class="date">開演：<strong class="fs14">04月13日 (日) 21時30分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：21時27分</p>
-							<p class="description">ニコプロ開局１周年記念公開収録第２弾！今回は大阪 カウント2.99さんからお届けします！第１部（21:30...</p>
+							<h2 class="title"><a href="http://live.nicovideo.jp/gate/lv274998037">【】プロ馬券師 よっさんの オールカマー【】</a></h2>
+							<p class="date">開演：<strong class="fs14">09月25日 (日) 15時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：14時57分</p>
+							<p class="description">今年の競馬収支 -80040円 今年の的中レース 中山金杯 単複 的中!! 京都金杯 ３連複 万馬券 的中!! 京成...</p>
 
 						<!-- liveなら -->
-													
+																			
 
-												<!-- liveかlive_payかif文だしわけここまで -->
-
-
+						
 
 
 
@@ -607,24 +669,22 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv174719537"
+	<a href="http://live.nicovideo.jp/gate/lv276183673"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/197264.jpg" class="lazyimage">
+		<img data-original="http://live.nicovideo.jp/thumb/446654.jpg" class="lazyimage">
 			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
 		
 	</a>
 </span>						</div>
 						<div class="item_right">
-							<h6 class="title"><a href="http://live.nicovideo.jp/gate/lv174719537">ニコプロ中継 プロレスリングZERO1 4.9 新木場大会</a></h6>
-							<p class="date">開演：<strong class="fs14">04月14日 (月) 21時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：20時57分</p>
-							<p class="description">プロレスリングZERO1 4.9新木場大会を中継します！※チャンネル会員以外の方も無料でご視聴頂ける部分も...</p>
+							<h2 class="title"><a href="http://live.nicovideo.jp/gate/lv276183673">【】土浦全国競技花火大会 放送【】</a></h2>
+							<p class="date">開演：<strong class="fs14">10月01日 (土) 18時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：17時57分</p>
+							<p class="description">常総花火大会のリベンジ。会場から離れた所で見る為電波は大丈夫だと信じたい。課金してしまったらいけ...</p>
 
 						<!-- liveなら -->
-													
+																			
 
-												<!-- liveかlive_payかif文だしわけここまで -->
-
-
+						
 
 
 
@@ -644,24 +704,22 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv174720155"
+	<a href="http://live.nicovideo.jp/gate/lv275980967"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/197270.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/445771.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>						</div>
 						<div class="item_right">
-							<h6 class="title"><a href="http://live.nicovideo.jp/gate/lv174720155">ニコプロ中継 ハナヤシキプロレスリング 2ndシーズン第１節 3.29大会</a></h6>
-							<p class="date">開演：<strong class="fs14">04月15日 (火) 21時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：20時57分</p>
-							<p class="description">3.29ハナヤシキプロレス2ndシーズン第1節の模様を中継します！※チャンネル会員以外の方も無料でご視聴頂...</p>
+							<h2 class="title"><a href="http://live.nicovideo.jp/gate/lv275980967">【】プロ馬券師 よっさんの スプリンターズステークス【】</a></h2>
+							<p class="date">開演：<strong class="fs14">10月02日 (日) 15時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：14時57分</p>
+							<p class="description">ついに秋のGⅠシリーズが始まる！今年の競馬収支 -80040円 今年の的中レース 中山金杯 単複 的中!! 京都...</p>
 
 						<!-- liveなら -->
-													
+																			
 
-												<!-- liveかlive_payかif文だしわけここまで -->
-
-
+						
 
 
 
@@ -681,24 +739,22 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv173333912"
+	<a href="http://live.nicovideo.jp/gate/lv275981065"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/194655.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/445772.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>						</div>
 						<div class="item_right">
-							<h6 class="title"><a href="http://live.nicovideo.jp/gate/lv173333912">ニコプロ生放送 紫雷美央の</a></h6>
-							<p class="date">開演：<strong class="fs14">04月17日 (木) 20時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：19時57分</p>
-							<p class="description">「何が起こるかわからないからタイトルがつけられない」でお馴染み紫雷美央選手の冠番組を今月も生放送...</p>
+							<h2 class="title"><a href="http://live.nicovideo.jp/gate/lv275981065">【】プロ馬券師 よっさんの 凱旋門賞【】</a></h2>
+							<p class="date">開演：<strong class="fs14">10月02日 (日) 22時30分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：22時27分</p>
+							<p class="description">競馬新時代に突入！海外でもPATで馬券が買える！今年の競馬収支 -80040円 今年の的中レース 中山金杯 単...</p>
 
 						<!-- liveなら -->
-													
+																			
 
-												<!-- liveかlive_payかif文だしわけここまで -->
-
-
+						
 
 
 
@@ -718,24 +774,22 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv175322574"
+	<a href="http://live.nicovideo.jp/gate/lv275997103"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/198406.jpg" class="lazyimage">
+		<img data-original="http://live.nicovideo.jp/thumb/445926.jpg" class="lazyimage">
 			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
 		
 	</a>
 </span>						</div>
 						<div class="item_right">
-							<h6 class="title"><a href="http://live.nicovideo.jp/gate/lv175322574">ニコプロ生放送 KAMINOGE＆ニコプロ連動番組「NICONOGE」(4月17日号）</a></h6>
-							<p class="date">開演：<strong class="fs14">04月17日 (木) 22時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：21時57分</p>
-							<p class="description">隔週木曜日にお届けする「NICONOGE」「世の中とプロレスするひろば」を標榜する雑誌「KAMINOGE」とニコ...</p>
+							<h2 class="title"><a href="http://live.nicovideo.jp/gate/lv275997103">【料理枠】八宝菜 を作りながら 会員限定のプレミアム雑談【】</a></h2>
+							<p class="date">開演：<strong class="fs14">10月03日 (月) 20時30分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：20時27分</p>
+							<p class="description">会員限定のプレミアム雑談。少しでも多くのコメントを取って雑談します。初めての八宝菜にも挑戦！</p>
 
 						<!-- liveなら -->
-													
+																			
 
-												<!-- liveかlive_payかif文だしわけここまで -->
-
-
+						
 
 
 
@@ -755,24 +809,22 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv174722165"
+	<a href="http://live.nicovideo.jp/gate/lv275997447"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/197279.jpg" class="lazyimage">
-		
+		<img data-original="http://live.nicovideo.jp/thumb/445930.jpg" class="lazyimage">
+			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
 		
 	</a>
 </span>						</div>
 						<div class="item_right">
-							<h6 class="title"><a href="http://live.nicovideo.jp/gate/lv174722165">ニコプロ無料生放送 田口隆祐・キャプテン・ニュージャパン生出演！ ニコプロ×キンプロ生放送</a></h6>
-							<p class="date">開演：<strong class="fs14">04月18日 (金) 22時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：21時57分</p>
-							<p class="description">毎月恒例の「キンプロ×ニコプロ生放送」、今回は4月11日（金）発売の『キング オブ プロレスリン...</p>
+							<h2 class="title"><a href="http://live.nicovideo.jp/gate/lv275997447">【】黒之と初めてのお散歩【】</a></h2>
+							<p class="date">開演：<strong class="fs14">10月04日 (火) 13時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：12時57分</p>
+							<p class="description">黒之と初めてのお散歩に行くぞ！近所の人にも挨拶しながら歩いて回ります。</p>
 
 						<!-- liveなら -->
-													
+																			
 
-												<!-- liveかlive_payかif文だしわけここまで -->
-
-
+						
 
 
 
@@ -792,135 +844,22 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv174721700"
+	<a href="http://live.nicovideo.jp/gate/lv275997942"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/197276.jpg" class="lazyimage">
+		<img data-original="http://live.nicovideo.jp/thumb/445936.jpg" class="lazyimage">
 			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
 		
 	</a>
 </span>						</div>
 						<div class="item_right">
-							<h6 class="title"><a href="http://live.nicovideo.jp/gate/lv174721700">ニコプロ生中継 みちのくプロレス 4.19新木場大会</a></h6>
-							<p class="date">開演：<strong class="fs14">04月19日 (土) 19時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：18時57分</p>
-							<p class="description">みちのくプロレス 4.19新木場ファーストリング大会を生中継!!東北タッグ選手権に加え、ムーの太陽とヤッ...</p>
+							<h2 class="title"><a href="http://live.nicovideo.jp/gate/lv275997942">【料理枠】エビチリ を作りながら 会員限定のプレミアム雑談【】</a></h2>
+							<p class="date">開演：<strong class="fs14">10月12日 (水) 20時30分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：20時27分</p>
+							<p class="description">会員限定のプレミアム雑談。少しでも多くのコメントを取って雑談します。初めてのエビチリにも挑戦！</p>
 
 						<!-- liveなら -->
-													
+																			
 
-												<!-- liveかlive_payかif文だしわけここまで -->
-
-
-
-
-
-												</div>
-						</li>
-					</ul>
-				</div>
-								<div class="item cfix">
-					<ul class="items">
-						<li class="item">
-						<div class="item_left">
-							
-
-
-
-
-
-
-<span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv175083287"
-	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/198115.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
-		
-	</a>
-</span>						</div>
-						<div class="item_right">
-							<h6 class="title"><a href="http://live.nicovideo.jp/gate/lv175083287">ニコプロ生中継 新日本プロレス4.20甲府大会</a></h6>
-							<p class="date">開演：<strong class="fs14">04月20日 (日) 15時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：14時57分</p>
-							<p class="description">新日本プロレス4.20甲府大会の模様を生中継します！※チャンネル会員以外の方も無料でご視聴頂ける部分も...</p>
-
-						<!-- liveなら -->
-													
-
-												<!-- liveかlive_payかif文だしわけここまで -->
-
-
-
-
-
-												</div>
-						</li>
-					</ul>
-				</div>
-								<div class="item cfix">
-					<ul class="items">
-						<li class="item">
-						<div class="item_left">
-							
-
-
-
-
-
-
-<span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv175618573"
-	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/199308.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
-		
-	</a>
-</span>						</div>
-						<div class="item_right">
-							<h6 class="title"><a href="http://live.nicovideo.jp/gate/lv175618573">ニコプロ生放送 WNC 真琴 生出演！</a></h6>
-							<p class="date">開演：<strong class="fs14">04月21日 (月) 21時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：20時57分</p>
-							<p class="description">WNCの華・真琴選手が生出演！レア度全開の番組を是非お楽しみください！【出演】真琴【MC】鈴木健.ｔｘ...</p>
-
-						<!-- liveなら -->
-													
-
-												<!-- liveかlive_payかif文だしわけここまで -->
-
-
-
-
-
-												</div>
-						</li>
-					</ul>
-				</div>
-								<div class="item cfix">
-					<ul class="items">
-						<li class="item">
-						<div class="item_left">
-							
-
-
-
-
-
-
-<span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv175618347"
-	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/199303.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
-		
-	</a>
-</span>						</div>
-						<div class="item_right">
-							<h6 class="title"><a href="http://live.nicovideo.jp/gate/lv175618347">ニコプロ生放送 WNC TAJIRI AKIRA 生出演！</a></h6>
-							<p class="date">開演：<strong class="fs14">04月23日 (水) 22時00分</strong>&nbsp;&#x20;&nbsp;&#x20;開場：21時57分</p>
-							<p class="description">WNCの大御所２人が揃い踏み！お２人でどのような番組をされるのか･･･？【出演】TAJIRI・AKIRA※チャンネ...</p>
-
-						<!-- liveなら -->
-													
-
-												<!-- liveかlive_payかif文だしわけここまで -->
-
-
+						
 
 
 
@@ -931,21 +870,21 @@ GA_googleFetchAds();
 							<!--↑予約番組あり↑-->
 			
 
-		<div class="announce">
-			<ul>
-				<li>
-								</li>
-				<li>
-				放送開始時に携帯メールでお知らせを受け取れます。<a href="http://www.nicovideo.jp/mail_livealert?service_id=34" target="_blank" class="fs14">ニコ生アラート設定へ ></a>
-				</li>
-			</ul>
-		</div>
-		</section><!--sub future-->
-				<section class="sub past">
-		<!--↓過去の生放送↓-->
-		<h1>
-			過去の放送
-		</h1>
+			<div class="announce">
+				<ul>
+					<li>
+											タイムシフト視聴をするには事前に予約が必要です。プレミアム会員なら予約なしで視聴できます。<a href="https://account.nicovideo.jp/premium/register?sec=channel_timeshift" target="_blank" class="fs14">もっとくわしく ></a>
+										</li>
+					<li>
+					放送開始時に携帯メールでお知らせを受け取れます。<a href="http://www.nicovideo.jp/mail_livealert?service_id=34" target="_blank" class="fs14">ニコ生アラート設定へ ></a>
+					</li>
+				</ul>
+			</div>
+		</section>
+		
+
+		<section class="sub past">
+		<h1>過去の放送</h1>
 
 				
 			<div class="item cfix">
@@ -960,30 +899,32 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv174775407"
+	<a href="http://live.nicovideo.jp/gate/lv275792184"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/199465.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/444910.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>				</div>
 				<div class="item_right">
-					<h6 class="title">
-						<a href="http://live.nicovideo.jp/gate/lv174775407">ニコプロオールナイト生放送 ＵＷＦ30周年記念座談会「Ｕは俺たちなんだよ！」</a>
-					</h6>
+					<h2 class="title">
+						<a href="http://live.nicovideo.jp/gate/lv275792184">【】2016年 秋アニメ 期待度ランキング【】</a>
+					</h2>
 					<p class="date">
-						放送開始：2014/04/11 (金) 23:57:00
+						放送開始：2016/09/22 (木) 20:57:00
 					</p>
 					<p class="description">
-						ニコプロ春のオールナイト放送祭り第3弾1984年4月11日 埼玉・大宮スケートセンターにてUWFが旗揚げされ...
+						34歳のおっさんが 2016年 秋アニメをぶった切る！評価基準◎ 90点以上 絶対観てもいい超おすすめのアニメ...
 					</p>
 
-					<!-- liveかlive_payかif文だしわけ -->
-					
-																																																	<p class="btn"><a href="http://live.nicovideo.jp/watch/lv174775407"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
-																																											<!-- liveかlive_payかif文だしわけここまで -->
+															
+																										
+																
+																												<p class="btn"><a href="http://live.nicovideo.jp/watch/lv275792184"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
+																																					
 
-				</div>
+
+									</div>
 				</li>
 				</ul>
 			</div>
@@ -1000,30 +941,32 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv175480152"
+	<a href="http://live.nicovideo.jp/gate/lv276561016"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/198936.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/447420.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>				</div>
 				<div class="item_right">
-					<h6 class="title">
-						<a href="http://live.nicovideo.jp/gate/lv175480152">ニコプロ中継 ヤス・ウラノ自主興行 『部屋とバンダナと私』 4.8新木場1stRING大会</a>
-					</h6>
+					<h2 class="title">
+						<a href="http://live.nicovideo.jp/gate/lv276561016">【】銀行は信用できなくなった 34歳 おっさんの雑談【】</a>
+					</h2>
 					<p class="date">
-						放送開始：2014/04/11 (金) 21:27:00
+						放送開始：2016/09/20 (火) 21:27:00
 					</p>
 					<p class="description">
-						ヤス・ウラノ自主興行 『部屋とバンダナと私』 4.8新木場1stRINGの模様を中継します！ ※チャンネル会員...
+						怖いよ・・(▀▀◕つ◕▀▀)
 					</p>
 
-					<!-- liveかlive_payかif文だしわけ -->
-					
-																																																	<p class="btn"><a href="http://live.nicovideo.jp/watch/lv175480152"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
-																																											<!-- liveかlive_payかif文だしわけここまで -->
+															
+																										
+																
+																												<p class="btn"><a href="http://live.nicovideo.jp/watch/lv276561016"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
+																																					
 
-				</div>
+
+									</div>
 				</li>
 				</ul>
 			</div>
@@ -1040,30 +983,32 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv173336010"
+	<a href="http://live.nicovideo.jp/gate/lv274995276"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/199242.jpg" class="lazyimage">
+		<img data-original="http://live.nicovideo.jp/thumb/442374.jpg" class="lazyimage">
 			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
 		
 	</a>
 </span>				</div>
 				<div class="item_right">
-					<h6 class="title">
-						<a href="http://live.nicovideo.jp/gate/lv173336010">ニコプロ生中継 大日本プロレス 4.10新木場大会＜実況コメンタリー有＞</a>
-					</h6>
+					<h2 class="title">
+						<a href="http://live.nicovideo.jp/gate/lv274995276">【料理枠】きんぴらごぼう を作りながら 会員限定のプレミアム雑談【】</a>
+					</h2>
 					<p class="date">
-						放送開始：2014/04/10 (木) 18:57:00
+						放送開始：2016/09/19 (月) 20:27:00
 					</p>
 					<p class="description">
-						大日本プロレス4.10新木場大会の模様を生中継します！！※チャンネル会員以外の方も無料でご視聴頂ける部...
+						会員限定のプレミアム雑談。少しでも多くのコメントを取って雑談します。初めてのきんぴらごぼうにも挑戦！
 					</p>
 
-					<!-- liveかlive_payかif文だしわけ -->
-					
-																																																	<p class="btn"><a href="http://live.nicovideo.jp/watch/lv173336010"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
-																																											<!-- liveかlive_payかif文だしわけここまで -->
+															
+																										
+																
+																												<p class="btn"><a href="http://live.nicovideo.jp/watch/lv274995276"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
+																																					
 
-				</div>
+
+									</div>
 				</li>
 				</ul>
 			</div>
@@ -1080,30 +1025,32 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv174947577"
+	<a href="http://live.nicovideo.jp/gate/lv274997910"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/197835.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/442413.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>				</div>
 				<div class="item_right">
-					<h6 class="title">
-						<a href="http://live.nicovideo.jp/gate/lv174947577">ニコプロ生放送！ 髙山善廣生出演！プロレス情報番組「ニコプロ一週間」(4月9日号）</a>
-					</h6>
+					<h2 class="title">
+						<a href="http://live.nicovideo.jp/gate/lv274997910">【】プロ馬券師 よっさんの セントライト記念【】</a>
+					</h2>
 					<p class="date">
-						放送開始：2014/04/09 (水) 21:57:00
+						放送開始：2016/09/18 (日) 14:57:00
 					</p>
 					<p class="description">
-						プロレス界の最新トピックスをお届けする情報番組試合結果や開催されるビッグマッチの見どころ。さらに...
+						今年の競馬収支 -80040円 今年の的中レース 中山金杯 単複 的中!! 京都金杯 ３連複 万馬券 的中!! 京成...
 					</p>
 
-					<!-- liveかlive_payかif文だしわけ -->
-					
-																																																	<p class="btn"><a href="http://live.nicovideo.jp/watch/lv174947577"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
-																																											<!-- liveかlive_payかif文だしわけここまで -->
+															
+																										
+																
+																												<p class="btn"><a href="http://live.nicovideo.jp/watch/lv274997910"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
+																																					
 
-				</div>
+
+									</div>
 				</li>
 				</ul>
 			</div>
@@ -1120,30 +1067,32 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv173331869"
+	<a href="http://live.nicovideo.jp/gate/lv276196005"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/198114.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/446681.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>				</div>
 				<div class="item_right">
-					<h6 class="title">
-						<a href="http://live.nicovideo.jp/gate/lv173331869">ニコプロ生放送　風香NIGHT (ゲスト：彩羽匠選手・愛星ゆうな選手)</a>
-					</h6>
+					<h2 class="title">
+						<a href="http://live.nicovideo.jp/gate/lv276196005">【】オレ的ゲーム速報＠刃 さんに捨てられた 放送【】</a>
+					</h2>
 					<p class="date">
-						放送開始：2014/04/08 (火) 20:57:00
+						放送開始：2016/09/17 (土) 18:27:00
 					</p>
 					<p class="description">
-						スターダム風香GMが所属選手をゲストに迎えて明るく楽しく少し危険なトークを繰り広げる風香NIGHT！【MC...
+						孤独・・寂しいよ (▀▀◕つ◕▀▀)
 					</p>
 
-					<!-- liveかlive_payかif文だしわけ -->
-					
-																																																	<p class="btn"><a href="http://live.nicovideo.jp/watch/lv173331869"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
-																																											<!-- liveかlive_payかif文だしわけここまで -->
+															
+																										
+																
+																												<p class="btn"><a href="http://live.nicovideo.jp/watch/lv276196005"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
+																																					
 
-				</div>
+
+									</div>
 				</li>
 				</ul>
 			</div>
@@ -1160,30 +1109,32 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv174717408"
+	<a href="http://live.nicovideo.jp/gate/lv276007490"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/197856.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/446035.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>				</div>
 				<div class="item_right">
-					<h6 class="title">
-						<a href="http://live.nicovideo.jp/gate/lv174717408">ニコプロ生中継 東京愚連隊自主興行 『TOKYO LOVE Ⅳ 〜classic events〜』 4.7新宿FACE大会</a>
-					</h6>
+					<h2 class="title">
+						<a href="http://live.nicovideo.jp/gate/lv276007490">【】34歳 おっさんの ソーセージを焼いて酒雑【】</a>
+					</h2>
 					<p class="date">
-						放送開始：2014/04/07 (月) 18:57:00
+						放送開始：2016/09/15 (木) 20:27:00
 					</p>
 					<p class="description">
-						東京愚連隊自主興行 『TOKYO LOVE Ⅳ 〜classic events〜』 4.7新宿FACE大会を生中継します！ ※チャンネ...
+						今日も1日お疲れ様でした (▀▀◕つ◕▀▀)
 					</p>
 
-					<!-- liveかlive_payかif文だしわけ -->
-					
-																																																	<p class="btn"><a href="http://live.nicovideo.jp/watch/lv174717408"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
-																																											<!-- liveかlive_payかif文だしわけここまで -->
+															
+																										
+																
+																												<p class="btn"><a href="http://live.nicovideo.jp/watch/lv276007490"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
+																																					
 
-				</div>
+
+									</div>
 				</li>
 				</ul>
 			</div>
@@ -1200,30 +1151,29 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv173334907"
+	<a href="http://live.nicovideo.jp/gate/lv275915893"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/197678.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/445590.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>				</div>
 				<div class="item_right">
-					<h6 class="title">
-						<a href="http://live.nicovideo.jp/gate/lv173334907">ニコプロ生放送 新日本プロレス INVASION ATTACK 2014 二次会</a>
-					</h6>
+					<h2 class="title">
+						<a href="http://live.nicovideo.jp/gate/lv275915893">【】34歳 おっさんの 晩酌【】</a>
+					</h2>
 					<p class="date">
-						放送開始：2014/04/06 (日) 21:57:00
+						放送開始：2016/09/14 (水) 20:27:00
 					</p>
 					<p class="description">
-						新日本プロレス INVASION ATTACK 2014 4.6両国国技館大会の熱気が冷めやらん内に皆さんで大会の感動と興...
+						今日も1日お疲れ様でした (▀▀◕つ◕▀▀)
 					</p>
 
-					<!-- liveかlive_payかif文だしわけ -->
-					
-																																																	<p class="btn"><a href="http://live.nicovideo.jp/watch/lv173334907"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
-																																											<!-- liveかlive_payかif文だしわけここまで -->
+															
+						
 
-				</div>
+
+									</div>
 				</li>
 				</ul>
 			</div>
@@ -1240,30 +1190,29 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv174724807"
+	<a href="http://live.nicovideo.jp/gate/lv274936781"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/197670.jpg" class="lazyimage">
-		
+		<img data-original="http://live.nicovideo.jp/thumb/442294.jpg" class="lazyimage">
+			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
 		
 	</a>
 </span>				</div>
 				<div class="item_right">
-					<h6 class="title">
-						<a href="http://live.nicovideo.jp/gate/lv174724807">ニコプロ無料生放送 プロレスリングWAVE「CATCH THE WAVE 2014」出場選手発表</a>
-					</h6>
+					<h2 class="title">
+						<a href="http://live.nicovideo.jp/gate/lv274936781">【料理枠】回鍋肉 を作りながら 会員限定のプレミアム雑談【】</a>
+					</h2>
 					<p class="date">
-						放送開始：2014/04/06 (日) 13:57:00
+						放送開始：2016/09/12 (月) 20:27:00
 					</p>
 					<p class="description">
-						5月5日後楽園ホール大会で開幕するプロレスリングWAVE「CATCH THE WAVE 2014」に出場する選手を発表しま...
+						会員限定のプレミアム雑談。少しでも多くのコメントを取って雑談します。初めての回鍋肉にも挑戦！
 					</p>
 
-					<!-- liveかlive_payかif文だしわけ -->
-					
-																																																	<p class="btn"><a href="http://live.nicovideo.jp/watch/lv174724807"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
-																																											<!-- liveかlive_payかif文だしわけここまで -->
+															
+						
 
-				</div>
+
+									</div>
 				</li>
 				</ul>
 			</div>
@@ -1280,30 +1229,29 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv173331015"
+	<a href="http://live.nicovideo.jp/gate/lv275626370"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/197666.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/444451.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>				</div>
 				<div class="item_right">
-					<h6 class="title">
-						<a href="http://live.nicovideo.jp/gate/lv173331015">ニコプロ生中継 プロレスリングWAVE 4.6新木場大会</a>
-					</h6>
+					<h2 class="title">
+						<a href="http://live.nicovideo.jp/gate/lv275626370">【】プロ馬券師 よっさんの 京成杯オータムハンデ【】</a>
+					</h2>
 					<p class="date">
-						放送開始：2014/04/06 (日) 11:57:00
+						放送開始：2016/09/11 (日) 18:32:23
 					</p>
 					<p class="description">
-						プロレスリングWAVE 4.6新木場大会を生中継します！桜花由美選手の誕生日を祝したHAPPY BIRTHDAY WAVEを...
+						今年の競馬収支 -60400円 今年の的中レース 中山金杯 単複 的中!! 京都金杯 ３連複 万馬券 的中!! 京成...
 					</p>
 
-					<!-- liveかlive_payかif文だしわけ -->
-					
-																																																	<p class="btn"><a href="http://live.nicovideo.jp/watch/lv173331015"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
-																																											<!-- liveかlive_payかif文だしわけここまで -->
+															
+						
 
-				</div>
+
+									</div>
 				</li>
 				</ul>
 			</div>
@@ -1320,30 +1268,29 @@ GA_googleFetchAds();
 
 
 <span class="thumb_wrapper thumb_wrapper_live">
-	<a href="http://live.nicovideo.jp/gate/lv174774900"
+	<a href="http://live.nicovideo.jp/gate/lv274936188"
 	class="thumb_live thumb_128">
-		<img data-original="http://live.nicovideo.jp/thumb/197833.jpg" class="lazyimage">
-			<span class="purchase_type" title=""><span class="inner ppv"></span></span>
+		<img data-original="http://live.nicovideo.jp/thumb/442292.jpg" class="lazyimage">
+		
 		
 	</a>
 </span>				</div>
 				<div class="item_right">
-					<h6 class="title">
-						<a href="http://live.nicovideo.jp/gate/lv174774900">ニコプロオールナイト生放送 ＷＷＥレッスルマニア30直前座談会</a>
-					</h6>
+					<h2 class="title">
+						<a href="http://live.nicovideo.jp/gate/lv274936188">【】プロ馬券師 よっさんの 京成杯オータムハンデ【】</a>
+					</h2>
 					<p class="date">
-						放送開始：2014/04/05 (土) 23:57:00
+						放送開始：2016/09/11 (日) 14:57:00
 					</p>
 					<p class="description">
-						ニコプロ春のオールナイト放送祭り第２弾ＷＷＥレッスルマニア30の直前座談会番組です！※話の展開によっ...
+						今年の競馬収支 -60400円 今年の的中レース 中山金杯 単複 的中!! 京都金杯 ３連複 万馬券 的中!! 京成...
 					</p>
 
-					<!-- liveかlive_payかif文だしわけ -->
-					
-																																																	<p class="btn"><a href="http://live.nicovideo.jp/watch/lv174774900"><img src="http://ch.res.nimg.jp/img/btn_live_timeshift.png" alt="タイムシフト視聴" title="タイムシフト視聴"></a></p>
-																																											<!-- liveかlive_payかif文だしわけここまで -->
+															
+						
 
-				</div>
+
+									</div>
 				</li>
 				</ul>
 			</div>
@@ -1372,13 +1319,20 @@ GA_googleFetchAds();
 </menu>
 							</footer>
 				<!--↑過去の生放送あり↑-->
-				</section><!--sub past-->	<!---->
+				</section><!--sub past-->	<!---->
 		</section><!--contents_list-->
 </section><!--content_body-->		</article>
 	</section>
 
 	<footer class="site">
 					
+
+
+
+	
+						
+									
+
 
 
 
@@ -1393,12 +1347,12 @@ GA_googleFetchAds();
 
 
 
-<span class="thumb_wrapper thumb_wrapper_ch updated_in_1week">
+<span class="thumb_wrapper thumb_wrapper_ch ">
 
-			<a href="/ch1487"
-		title="ニコプロ -ニコニコプロレスチャンネル-"
-		class="thumb_ch thumb_100 updated_in_1week">
-				<img data-original="http://icon.nimg.jp/channel/ch1487.jpg?1397220855" class="lazyimage">
+			<a href="/ch2621556"
+		title="今日も元気におはよっさん 株式会社の章"
+		class="thumb_ch thumb_100 ">
+				<img data-original="http://icon.nimg.jp/channel/ch2621556.jpg?1468234105" class="lazyimage">
 												</a>
 	
 	
@@ -1406,39 +1360,46 @@ GA_googleFetchAds();
 
 			<div id="cp_profile">
 				<div class="inner_box">
-					<h3 class="cp_chname">ニコプロ -ニコニコプロレスチャンネル-</h3>
-											<p class="cp_viewname">提供：株式会社 ニワンゴ</p>
-										<ul class="cp_footmenu"><li><a href="javascript:void(0);" onclick="window.open('/blogparts/ch1487', 'ch_blogparts_popup', 'scrollbars=yes,resizable=yes,width=600,height=560');">貼り付けタグを取得する</a></li><li><a href="http://ch.nicovideo.jp/letter/ch1487">ご意見・ご要望はこちら</a></li></ul>
+					<h3 class="cp_chname">今日も元気におはよっさん 株式会社の章</h3>
+											<p class="cp_viewname">提供：株式会社今日も元気におはよっさん</p>
+										<ul class="cp_footmenu"><li><a href="javascript:void(0);" onclick="window.open('/blogparts/ch2621556', 'ch_blogparts_popup', 'scrollbars=yes,resizable=yes,width=600,height=560');">貼り付けタグを取得する</a></li><li><a href="http://ch.nicovideo.jp/letter/ch2621556">ご意見・ご要望はこちら</a></li></ul>
 				</div>
 															<div class="inner_box">
 						<h3>タグ</h3>
 							<ul class="cp_tags">
-																	<li><a href="/search/PROWRESTLING?mode=t">PROWRESTLING</a></li>
-																	<li><a href="/search/%E3%82%B9%E3%82%BF%E3%83%BC%E3%83%80%E3%83%A0?mode=t">スターダム</a></li>
-																	<li><a href="/search/%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%84?mode=t">スポーツ</a></li>
-																	<li><a href="/search/%E3%83%89%E3%83%A9%E3%82%B4%E3%83%B3%E3%82%B2%E3%83%BC%E3%83%88?mode=t">ドラゴンゲート</a></li>
-																	<li><a href="/search/%E3%83%8B%E3%82%B3%E3%83%8B%E3%82%B3%E3%83%97%E3%83%AD%E3%83%AC%E3%82%B9?mode=t">ニコニコプロレス</a></li>
-																	<li><a href="/search/%E3%83%8B%E3%82%B3%E3%83%97%E3%83%AD?mode=t">ニコプロ</a></li>
-																	<li><a href="/search/%E3%83%97%E3%83%AD%E3%83%AC%E3%82%B9?mode=t">プロレス</a></li>
-																	<li><a href="/search/%E3%83%97%E3%83%AD%E3%83%AC%E3%82%B9%E3%83%AA%E3%83%B3%E3%82%B0%E3%83%BB%E3%83%8E%E3%82%A2?mode=t">プロレスリング・ノア</a></li>
-																	<li><a href="/search/%E5%85%A8%E6%97%A5%E6%9C%AC%E3%83%97%E3%83%AD%E3%83%AC%E3%82%B9?mode=t">全日本プロレス</a></li>
-																	<li><a href="/search/%E6%96%B0%E6%97%A5%E6%9C%AC%E3%83%97%E3%83%AD%E3%83%AC%E3%82%B9?mode=t">新日本プロレス</a></li>
+																	<li><a href="/search/%E3%82%A8%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%86%E3%82%A4%E3%83%A1%E3%83%B3%E3%83%88?mode=t">エンターテイメント</a></li>
+																	<li><a href="/search/%E3%83%91%E3%83%81%E3%82%B9%E3%83%AD?mode=t">パチスロ</a></li>
+																	<li><a href="/search/%E3%82%88%E3%81%A3%E3%81%95%E3%82%93?mode=t">よっさん</a></li>
+																	<li><a href="/search/%E5%A4%96%E9%85%8D%E4%BF%A1?mode=t">外配信</a></li>
+																	<li><a href="/search/%E6%A3%AE%E7%BE%A9%E4%B9%8B?mode=t">森義之</a></li>
+																	<li><a href="/search/%E7%AB%B6%E9%A6%AC?mode=t">競馬</a></li>
+																	<li><a href="/search/%E9%9B%91%E8%AB%87?mode=t">雑談</a></li>
 															</ul>
 						</div>
 																<div class="inner_box">
 							<h3>説明文</h3>
-							<p>あなたに新しいプロレスライフを提供するプロレス専門チャンネル「ニコニコプロレスチャンネル」プロレス界の最新情報から、レスラーによるトーク番組。注目大会の試合中継などを生放送予定。</p>
+							<p>株式会社今日も元気におはよっさん！このチャンネルは代表取締役の森義之こと、よっさんが立ち上げた企業チャンネルだ！これからチャンネル放送をして色んな事に挑戦していきたいと思う。今までもこれからも変わらず頑張っていきたいので宜しくお願いします。</p>
 						</div>
 												</div>
 
 			<div id="join"></div>
 
 			<div id="cp_joinmenu">
-													<p class="text">このチャンネルは有料です</p>
-					<p class="btn_join"><a href="https://secure.ch.nicovideo.jp/bylaw/ch1487">このチャンネルに入会する</a></p>
-				
-									<p class="text">月額：<strong>&yen;540</strong> <span class="tax_included">(税込)</span></p>
-									
+				<div class="join_leave">
+
+										
+																				<a href="https://secure.ch.nicovideo.jp/bylaw/ch2621556"
+			class="join ">
+				チャンネルに入会
+			</a>
+				<p class="channel_price">
+		月額：<strong>&yen;540</strong>
+		<span class="tax_included">(税込)</span>
+	</p>
+						
+										
+				</div>
+
 			</div>
 
 
@@ -1455,13 +1416,15 @@ GA_googleFetchAds();
 				<li><a href="/channel_catalog">開設されたチャンネル</a>
 				<li><a href="/static/rule.html">利用規約</a>
 				<li><a href="/static/tokutei.html">特定商取引法の表示</a>
-				<li><a href="http://faq.nicovideo.jp/EokpControl?&event=CE0002&cid=10307">ヘルプ</a>
+				<li><a href="http://qa.nicovideo.jp/category/show/429">ヘルプ</a>
+				<li><a href="http://dwango.co.jp/" target="_blank" class="icon blank">運営会社</a>
 			</ul>
 		</nav>
 
 		<nav id="foot_nav_categories" class="foot_common_nav">
 			<h3 class="nav_title">カテゴリとポータル</h3>
 			<ul>
+				<li><a href="http://ch.nicovideo.jp/portal/event">イベント</a>
 				<li><a href="http://ch.nicovideo.jp/portal/blomaga">ブロマガ</a>
 				<li><a href="http://ch.nicovideo.jp/portal/anime">アニメ</a>
 				<li><a href="http://ch.nicovideo.jp/portal/movie">映画・ドラマ</a>
@@ -1474,6 +1437,7 @@ GA_googleFetchAds();
 				<li><a href="http://ch.nicovideo.jp/portal/sports">スポーツ</a>
 				<li><a href="http://ch.nicovideo.jp/portal/showbiz">芸能</a>
 				<li><a href="http://ch.nicovideo.jp/portal/life">生活</a>
+				<li><a href="http://ch.nicovideo.jp/portal/politics">政治</a>
 				<li><a href="http://ch.nicovideo.jp/portal/game">ゲーム</a>
 				<li><a href="http://ch.nicovideo.jp/portal/variety">バラエティ</a>
 				<li><a href="http://ch.nicovideo.jp/portal/gravure">グラビア</a>
@@ -1487,32 +1451,37 @@ GA_googleFetchAds();
 				<li><a href="/my/following">登録したチャンネル</a>
 				<li><a href="http://www.nicovideo.jp/my/top">マイページ</a>
 				<li><a href="http://point.nicovideo.jp/index/purchase/">ポイントの購入</a>
-				<li><a href="https://secure.nicovideo.jp/secure/logout">ログアウト</a>
+				<li><a href="https://account.nicovideo.jp/logout">ログアウト</a>
 						</ul>
 		</nav>
 
 		<nav id="foot_nav_cpsupport" class="foot_common_nav">
 			<h3 class="nav_title">開設／お問い合わせ</h3>
 			<ul>
-				<li><a href="https://secure.ch.nicovideo.jp/application/info/top">チャンネルを開設する</a>
-				<li><a href="/blomaga">ブログを開設する</a>
-				<li><a href="https://secure.ch.nicovideo.jp/application/mediaplan/">ブログ(大手メディアプラン)を<br>
-					開設する</a>
-				<li><a href="http://bbs.nicovideo.jp/test/read.cgi/request/1345861812/">ブログ・ブロマガに関する要望掲示板</a>
-				<li><a href="https://secure.nicovideo.jp/form/ads">広告出稿に関するお問い合わせ</a>
+				<li><a href="/start" class="wbr"><span>チャンネルを</span><span>開設する</span></a>
+				<li><a href="/blomaga" class="wbr"><span>ブログを</span><span>開設する</span></a>
+				<li><a href="https://secure.ch.nicovideo.jp/application/mediaplan/">
+					ブログを開設する<small>(大手メディアプラン)</small>
+				</a>
+				<li><a href="http://bbs.nicovideo.jp/test/read.cgi/request/1345861812/" class="wbr">
+					<span>ブログ・ブロマガ</span><span>要望掲示板</span>
+				</a>
+				<li><a href="http://sales.ads.nicovideo.jp/" class="wbr"><span>広告出稿に</span><span>関する</span><span>お問い合わせ</span></a>
 			</ul>
 		</nav>
 
 		
 		<small id="foot_copyright">
-			<p><a href="http://niwango.jp/" target="_blank">&copy; niwango,inc. All rights reserved.</a></p>
+			<p><a href="http://dwango.co.jp/" target="_blank">&copy; DWANGO Co., Ltd.</a></p>
 		</small>
 
 	</div>
-</div>		
+</div>		
+    		
 		
 	</footer>
 
+		
 				<div class="nicoch_modal" id="timeshift_modal" style="display:none;">
 	<div class="nicoch_modal_overlay" onclick="TimeShift.registHide()"></div>
 	<div class="nicoch_modal_window" id="watching_reservation_regist">
@@ -1527,7 +1496,7 @@ GA_googleFetchAds();
 	<div class="body"></div>
 	<span class="close">&times;</span>
 </div>
-		
+		<div id="loginbox_mask" style="display: none;"></div>
 <section id="loginbox_balloon" style="display: none;">
 	<h1></h1>
 	<dl class="login">
@@ -1546,7 +1515,7 @@ var MSG_loginbox = {
 	title : "niconicoアカウントにログイン",
 	login : {
 		label : "ログイン",
-		url : "https://secure.nicovideo.jp/secure/login_form?next_url=%2Fnicopro%2Flive&site=channel&time=1397302630&hash_key=8b44d495",
+		url : "https://account.nicovideo.jp/login?next_url=%2Fkyoumogenkiniohayossan%2Flive&site=channel&time=1474632051&hash_key=a54be4ef",
 		description : "アカウントをお持ちの方はログイン<br>してください。"
 	},
 	register : {
@@ -1559,13 +1528,17 @@ Ch.loginbox.init();
 </script>
 
 	
+
+
+
+
+
 		
 <script src="http://platform.twitter.com/widgets.js" defer async></script>
 <script src="http://b.st-hatena.com/js/bookmark_button.js" defer async></script>
 <script src="https://apis.google.com/js/plusone.js" defer async>{lang:'ja'}</script>
 <div id="fb-root"></div>
 
-<script src="http://ch.res.nimg.jp/js/utm.nicoch.js?2012-10-03"></script>
 <script src="http://ch.res.nimg.jp/js/timeshift.js?2012-08-21"></script>
 
 
@@ -1587,5 +1560,32 @@ if (parent != window) {
 	}, true);
 }
 </script>
+
+<script>
+var ptSampleRate = 0;
+</script>
+
+
+<script type="text/javascript">
+window._pt_lt = new Date().getTime();
+window._pt_sp_2 = [];
+_pt_sp_2.push('setAccount,4ef1ca6b');
+_pt_sp_2.push('setSampleRate,' + ptSampleRate);
+var _protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+(function() {
+	var atag = document.createElement('script');
+	atag.type = 'text/javascript';
+	atag.async = true;
+	atag.src = _protocol + 'js.ptengine.jp/pta.js';
+	var stag = document.createElement('script');
+	stag.type = 'text/javascript';
+	stag.async = true;
+	stag.src = _protocol + 'js.ptengine.jp/pts.js';
+	var s = document.getElementsByTagName('script')[0];
+	s.parentNode.insertBefore(atag, s);
+	s.parentNode.insertBefore(stag, s);
+})();
+</script>
+
 </body>
 </html>
